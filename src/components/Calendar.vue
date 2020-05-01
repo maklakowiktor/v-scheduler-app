@@ -102,8 +102,8 @@
   </v-row>
 </template>
 
-
 <script>
+import { db } from '@/main';
 export default {
     data: () => ({
         today: new Date().toISOString().substr(0, 10),
@@ -131,8 +131,13 @@ export default {
         this.getEvents();
     },
     methods: {
-        getEvents() {
-            
+        async getEvents() {
+            let snapshot = await db.collection("calEvent").get();
+            // let events = [];
+            // snapshot.docs.map(doc => console.log(doc.data()));
+            snapshot.forEach(doc => {
+              console.log(doc.data());
+            });
         }
     }
 };
