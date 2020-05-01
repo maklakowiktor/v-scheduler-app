@@ -1,4 +1,4 @@
-# vue-calendar
+# v-scheduler-app
 
 ## Project setup
 ```
