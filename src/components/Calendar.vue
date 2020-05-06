@@ -41,7 +41,9 @@
           </v-menu>
         </v-toolbar>
       </v-sheet>
-
+      <v-alert type="error" v-show="errShow">
+          Поля "Название", "Дата начала" и "Дата окончания" должны быть заполнены!
+      </v-alert>
       <!-- Диалоговое окно добавления события -->
       <v-dialog v-model="dialog" max-width="500">
         <v-card>
@@ -150,6 +152,7 @@ export default {
         selectedOpen: false,
         events: [],
         dialog: false,
+        errShow: false
     }),
     computed: {
       title () {
@@ -190,6 +193,12 @@ export default {
         this.getEvents();
     },
     methods: {
+      alertErr() {
+        this.errShow = true;
+        setTimeout( () => {
+          this.errShow = false;
+        }, 3000)
+      },
       async getEvents() {
         let snapshot = await db.collection("calEvent").get();
         let events = [];
@@ -217,7 +226,8 @@ export default {
           this.end = '';
           this.color = '#1976D2';
         } else {
-          alert('Название, дата начала и окончания должны быть заполнены!');
+          this.alertErr();
+          // alert('Название, дата начала и окончания должны быть заполнены!');
         }
       },
       async updateEvent(ev) {
