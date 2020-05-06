@@ -227,7 +227,6 @@ export default {
           this.color = '#1976D2';
         } else {
           this.alertErr();
-          // alert('Название, дата начала и окончания должны быть заполнены!');
         }
       },
       async updateEvent(ev) {
