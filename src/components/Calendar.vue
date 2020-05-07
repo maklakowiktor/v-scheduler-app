@@ -51,8 +51,8 @@
             <v-form @submit.prevent="addEvent">
               <v-text-field v-model="name" type="text" label="Название (Обязательно)"></v-text-field>
               <v-text-field v-model="details" type="text" label="Описание"></v-text-field>
-              <v-text-field v-model="start" type="date" label="Начало (Обязательно)"></v-text-field>
-              <v-text-field v-model="end" type="date" label="Окончание (Обязательно)"></v-text-field>
+              <v-text-field v-model="start" type="datetime-local" label="Начало (Обязательно)"></v-text-field>
+              <v-text-field v-model="end" type="datetime-local" label="Окончание (Обязательно)"></v-text-field>
               <v-text-field v-model="color" type="color" label="Цвет (Нажмите, чтобы открыть меню выбора цвета)"></v-text-field>
               <v-btn 
                 type="submit" 
