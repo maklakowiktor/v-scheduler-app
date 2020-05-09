@@ -12,6 +12,7 @@
     "core-js": "^3.6.4",
     "express": "^4.17.1",
     "firebase": "^7.14.2",
+    "material-design-icons-iconfont": "^5.0.1",
     "vue": "^2.6.11",
     "vue-textarea-autosize": "^1.1.1",
     "vuetify": "^2.2.11"

@@ -4,6 +4,7 @@ import vuetify from './plugins/vuetify';
 import VueTextareaAutosize from 'vue-textarea-autosize';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'material-design-icons-iconfont/dist/material-design-icons.css';
 
 Vue.use(VueTextareaAutosize);
 
@@ -20,6 +21,7 @@ firebase.initializeApp({
 })
 
 export const db = firebase.firestore();
+
 
 new Vue({
   vuetify,

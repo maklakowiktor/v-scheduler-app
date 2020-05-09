@@ -1,8 +1,32 @@
 <template>
   <v-row class="fill-height">
+    <v-navigation-drawer v-model="drawer" app class="white">
+       <v-list
+        nav
+        dense
+      >
+        <v-list-item-group v-model="item" color="primary">
+          <v-list-item
+            v-for="(item, i) in items"
+            :key="i"
+          >
+            <v-list-item-icon>
+              <v-icon v-text="item.icon"></v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title v-text="item.text"></v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
     <v-col>
       <v-sheet height="64">
         <v-toolbar flat color="white">
+          <!-- Sidebar btn -->
+          <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>
+
           <v-btn color="primary" class="mr-4" @click="dialog = true" dark>Новое событие</v-btn>
           <v-btn outlined class="mr-4" @click="setToday">Сегодня</v-btn>
           <v-btn fab text small color="grey darken-2" @click="prev">
@@ -83,7 +107,6 @@
           v-model="selectedOpen"
           :close-on-content-click="false"
           :activator="selectedElement"
-          full-width
           offset-x
         >
           <v-card
@@ -150,9 +173,36 @@ export default {
         selectedEvent: {},
         selectedElement: null,
         selectedOpen: false,
-        events: [],
+        events: [
+          {
+            name: 'Weekly Meeting',
+            start: '2020-09-05 09:00',
+            end: '2020-09-05 10:00',
+          },
+          {
+            name: 'Thomas\' Birthday',
+            start: '2020-09-05',
+          },
+          {
+            name: 'Mash Potatoes',
+            start: '2020-09-05 12:30',
+            end: '2020-09-05 15:30',
+          }
+        ],
         dialog: false,
-        errShow: false
+        errShow: false,
+        drawer: false,
+        width: 300,
+        item: 0,
+        items: [
+          { text: 'Сегодня', icon: 'mdi-folder' },
+          { text: 'Календарь', icon: 'mdi-calendar' },
+          { text: 'Starred', icon: 'mdi-star' },
+          { text: 'Recent', icon: 'mdi-history' },
+          { text: 'Offline', icon: 'mdi-check-circle' },
+          { text: 'Uploads', icon: 'mdi-upload' },
+          { text: 'Backups', icon: 'mdi-cloud-upload' },
+        ],
     }),
     computed: {
       title () {
@@ -208,7 +258,8 @@ export default {
           appData.id = doc.id;
           events.push(appData);
         });
-        this.events = events;
+        events.map(item => this.events.push(item));
+        // this.events = events;
       },
       async addEvent() {
         if(this.name && this.start && this.end) {
@@ -305,8 +356,17 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
   .col {
     padding: 0 12px 0 12px !important;
+  }
+
+  .lightbox {
+    box-shadow: 0 0 20px inset rgba(0, 0, 0, 0.2);
+    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, transparent 72px);
+  }
+
+  .v-calendar {
+    height: calc(100vh - 64px) !important;
   }
 </style>
