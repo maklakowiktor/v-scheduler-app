@@ -1,24 +1,24 @@
 <template>
   <v-row class="fill-height">
+    <!-- Сайдбар -->
     <v-navigation-drawer v-model="drawer" app class="white">
        <v-list
         nav
         dense
       >
-        <v-list-item-group v-model="item" color="primary">
-          <v-list-item
-            v-for="(item, i) in items"
-            :key="i"
-          >
-            <v-list-item-icon>
-              <v-icon v-text="item.icon"></v-icon>
-            </v-list-item-icon>
-
-            <v-list-item-content>
-              <v-list-item-title v-text="item.text"></v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-item-group>
+        <v-list-item
+          v-for="(item, i) in items"
+          :key="i"
+          link
+          :to="item.link"
+        >
+          <v-list-item-icon>
+            <v-icon v-text="item.icon"></v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title v-text="item.text"></v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
     <v-col>
@@ -27,7 +27,8 @@
           <!-- Sidebar btn -->
           <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>
 
-          <v-btn color="primary" class="mr-4" @click="dialog = true" dark>Новое событие</v-btn>
+          <!-- <v-btn color="" class="mr-4" @click="dialog = true" dark>+</v-btn> -->
+          
           <v-btn outlined class="mr-4" @click="setToday">Сегодня</v-btn>
           <v-btn fab text small color="grey darken-2" @click="prev">
             <v-icon small>mdi-chevron-left</v-icon>
@@ -65,8 +66,9 @@
           </v-menu>
         </v-toolbar>
       </v-sheet>
+      <!-- Предупреждение -->
       <v-alert type="error" v-show="errShow">
-          Поля "Название", "Дата начала" и "Дата окончания" должны быть заполнены!
+        Поля "Название", "Дата начала" и "Дата окончания" должны быть заполнены!
       </v-alert>
       <!-- Диалоговое окно добавления события -->
       <v-dialog v-model="dialog" max-width="500">
@@ -89,7 +91,7 @@
         </v-card>
       </v-dialog>
       
-      <v-sheet height="600">
+      <v-sheet> <!-- Prop: height="600" -->
         <v-calendar
           ref="calendar"
           v-model="focus"
@@ -147,6 +149,10 @@
           </v-card>
         </v-menu>
       </v-sheet>
+      <v-btn fixed bottom right class="ma-5" fab dark color="indigo" @click="dialog = true">
+        <v-icon dark>mdi-plus</v-icon>
+      </v-btn>
+      
     </v-col>
   </v-row>
 </template>
@@ -173,35 +179,15 @@ export default {
         selectedEvent: {},
         selectedElement: null,
         selectedOpen: false,
-        events: [
-          {
-            name: 'Weekly Meeting',
-            start: '2020-09-05 09:00',
-            end: '2020-09-05 10:00',
-          },
-          {
-            name: 'Thomas\' Birthday',
-            start: '2020-09-05',
-          },
-          {
-            name: 'Mash Potatoes',
-            start: '2020-09-05 12:30',
-            end: '2020-09-05 15:30',
-          }
-        ],
+        events: [],
         dialog: false,
         errShow: false,
         drawer: false,
         width: 300,
         item: 0,
         items: [
-          { text: 'Сегодня', icon: 'mdi-folder' },
-          { text: 'Календарь', icon: 'mdi-calendar' },
-          { text: 'Starred', icon: 'mdi-star' },
-          { text: 'Recent', icon: 'mdi-history' },
-          { text: 'Offline', icon: 'mdi-check-circle' },
-          { text: 'Uploads', icon: 'mdi-upload' },
-          { text: 'Backups', icon: 'mdi-cloud-upload' },
+          { text: 'Сегодня', icon: 'mdi-home', link: '/' },
+          { text: 'Календарь', icon: 'mdi-calendar', link: '/calendar' },
         ],
     }),
     computed: {
@@ -258,8 +244,8 @@ export default {
           appData.id = doc.id;
           events.push(appData);
         });
-        events.map(item => this.events.push(item));
-        // this.events = events;
+        // events.map(item => this.events.push(item));
+        this.events = events;
       },
       async addEvent() {
         if(this.name && this.start && this.end) {
@@ -368,5 +354,9 @@ export default {
 
   .v-calendar {
     height: calc(100vh - 64px) !important;
+  }
+
+  .v-calendar-daily__day-interval:hover, .v-calendar-weekly__day:hover {
+    background-color: #f5f5f5 !important;
   }
 </style>
