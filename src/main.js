@@ -12,6 +12,7 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css';
 
 Vue.use(VueRouter);
 Vue.use(VueTextareaAutosize);
+Vue.use(vuetify);
 Vue.config.productionTip = false;
 
 const router = new VueRouter({
