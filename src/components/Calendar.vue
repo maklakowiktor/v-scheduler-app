@@ -186,8 +186,9 @@ export default {
         width: 300,
         item: 0,
         items: [
-          { text: 'Сегодня', icon: 'mdi-home', link: '/' },
-          { text: 'Календарь', icon: 'mdi-calendar', link: '/calendar' },
+          { text: "Сегодня", icon: "mdi-group", link: "/" },
+          { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
+          { text: "Дела", icon: "mdi-home", link: "/todo" }
         ]
     }),
     computed: {

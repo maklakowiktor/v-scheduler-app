@@ -21,6 +21,7 @@
           <v-spacer></v-spacer>
         </v-toolbar>
       </v-sheet>
+      <template>
         <v-container style="max-width: 500px">
           <v-text-field
             v-model="task"
@@ -84,6 +85,7 @@
             </v-slide-y-transition>
           </v-card>
         </v-container>
+      </template>
     </v-col>
   </v-row>
 </template>
@@ -98,8 +100,9 @@ export default {
     item: 0,
     drawer: false,
     items: [
-      { text: "Сегодня", icon: "mdi-home", link: "/" },
-      { text: "Календарь", icon: "mdi-calendar", link: "/calendar" }
+      { text: "Сегодня", icon: "mdi-group", link: "/" },
+      { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
+      { text: "Дела", icon: "mdi-home", link: "/todo" }
     ],
     tasks: [
       {
@@ -140,6 +143,7 @@ export default {
       });
       // events.map(item => this.events.push(item));
       this.events = events;
+      console.log(this.events);
     },
     create () {
       this.tasks.push({

@@ -3,7 +3,7 @@ import VueRouter from 'vue-router';
 import App from './App.vue';
 import Calendar from './components/Calendar.vue';
 import Todo from './components/Todo.vue';
-import NotFound from './components/NotFound.vue';
+import Today from './components/Today.vue';
 import vuetify from './plugins/vuetify';
 import VueTextareaAutosize from 'vue-textarea-autosize';
 import firebase from 'firebase/app';
@@ -18,9 +18,9 @@ const router = new VueRouter({
   mode: 'history',
   routes: [
     {
-      name: 'Todo',
+      name: 'Today',
       path: '/',
-      component: Todo
+      component: Today
     },
     { 
       name: 'Calendar',
@@ -28,8 +28,13 @@ const router = new VueRouter({
       component: Calendar
     },
     {
+      name: 'Todo',
+      path: '/todo',
+      component: Todo
+    },
+    {
       path: '/*',
-      component: NotFound
+      redirect: '/'
     }
   ]
 })
