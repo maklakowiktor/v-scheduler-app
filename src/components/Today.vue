@@ -31,7 +31,7 @@
                 v-for="(event, i) in events"
                 :key="i"
                 cols="12"
-                class="ma-5"
+                class="ma-3"
                 >
                 <v-card
                     :color="event.color"
@@ -45,6 +45,9 @@
                             ></v-card-title>
 
                             <v-card-subtitle v-text="event.details"></v-card-subtitle>
+                        </div>
+                        <div>
+                            <v-card-subtitle v-text="event.start"></v-card-subtitle>
                         </div>
                     </div>
                 </v-card>
@@ -100,14 +103,31 @@ export default {
   },
   methods: {
     async getEvents() {
-      let snapshot = await db.collection("calEvent").get();
-      let events = [];
+      const regExp = /(\d{4}-\d{2}-\d{2})/g,
+            currentDate = new Date().toJSON().slice(0,10).toString();
 
+      let snapshot = await db.collection("calEvent").get(),
+          events = [];
+      
       snapshot.forEach(doc => {
         let appData = doc.data();
         appData.id = doc.id;
         events.push(appData);
       });
+      
+      events.map((event) => {
+        for ( let key in event ) {
+          let fieldStart = event[key];
+          
+          if ( key === 'start' ) {
+            let arrField = fieldStart.match(regExp);
+            event[key] = arrField[0];
+          }
+        }
+      })
+
+      events = events.filter( item => item.start === currentDate )
+
       this.events = events;
       this.loading = false;
     },
