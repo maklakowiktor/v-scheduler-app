@@ -27,11 +27,15 @@
                 <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
             </div>
             <v-row v-else dense>
+                <v-col v-if="!events.length">
+                  <h2>Нет запланированных встреч на сегодня</h2>
+                </v-col>
                 <v-col
-                v-for="(event, i) in events"
-                :key="i"
-                cols="12"
-                class="ma-3"
+                  v-for="(event, i) in events"
+                  :key="i"
+                  cols="12"
+                  class="ma-3"
+                  v-else
                 >
                 <v-card
                     :color="event.color"
@@ -69,9 +73,9 @@ export default {
     item: 0,
     drawer: false,
     items: [
-        { text: "Сегодня", icon: "mdi-group", link: "/" },
-        { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
-        { text: "Дела", icon: "mdi-home", link: "/todo" }
+      { text: "Сегодня", icon: "mdi-clipboard-outline", link: "/" },
+      { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
+      { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
     ],
     tasks: [
       {
@@ -118,7 +122,7 @@ export default {
       events.map((event) => {
         for ( let key in event ) {
           let fieldStart = event[key];
-          
+
           if ( key === 'start' ) {
             let arrField = fieldStart.match(regExp);
             event[key] = arrField[0];

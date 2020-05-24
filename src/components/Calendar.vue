@@ -67,9 +67,11 @@
         </v-toolbar>
       </v-sheet>
       <!-- Предупреждение -->
-      <v-alert type="error" v-show="errShow">
-        Поля "Название", "Дата начала" и "Дата окончания" должны быть заполнены!
-      </v-alert>
+      <v-slide-y-transition class="py-0">
+        <v-alert type="error" v-show="errShow">
+          Поля "Название", "Дата начала" и "Дата окончания" должны быть заполнены!
+        </v-alert>
+      </v-slide-y-transition>
       <!-- Диалоговое окно добавления события -->
       <v-dialog v-model="dialog" max-width="500">
         <v-card>
@@ -186,9 +188,9 @@ export default {
         width: 300,
         item: 0,
         items: [
-          { text: "Сегодня", icon: "mdi-group", link: "/" },
+          { text: "Сегодня", icon: "mdi-clipboard-outline", link: "/" },
           { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
-          { text: "Дела", icon: "mdi-home", link: "/todo" }
+          { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
         ]
     }),
     computed: {
@@ -228,6 +230,7 @@ export default {
     },
     mounted() {
         this.getEvents();
+        this.end = this.start = new Date().toJSON().slice(0, 10).toString() + 'T12:00';
     },
     methods: {
       alertErr() {

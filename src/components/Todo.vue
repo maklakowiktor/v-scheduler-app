@@ -22,7 +22,7 @@
         </v-toolbar>
       </v-sheet>
       <template>
-        <v-container style="max-width: 500px">
+        <v-container style="max-width: 768px">
           <v-text-field
             v-model="task"
             label="Над чем работаете?"
@@ -62,10 +62,9 @@
             <v-slide-y-transition class="py-0" group tag="v-list">
               <template v-for="(task, i) in tasks">
                 <v-divider v-if="i !== 0" :key="`${i}-divider`"></v-divider>
-
-                <v-list-tile :key="`${i}-${task.text}`">
-                  <v-list-tile-action>
-                    <v-checkbox v-model="task.done" color="info darken-3">
+                <v-list-item :key="`${i}-${task.text}`">
+                  <v-list-item-action>
+                    <v-checkbox v-model="task.done" color="info darken-3" @change="completeTask(task.id, task.done)">
                       <div
                         slot="label"
                         :class="task.done && 'grey--text' || 'text--primary'"
@@ -73,14 +72,14 @@
                         v-text="task.text"
                       ></div>
                     </v-checkbox>
-                  </v-list-tile-action>
+                  </v-list-item-action>
 
                   <v-spacer></v-spacer>
 
                   <v-scroll-x-transition>
                     <v-icon v-if="task.done" color="success">check</v-icon>
                   </v-scroll-x-transition>
-                </v-list-tile>
+                </v-list-item>
               </template>
             </v-slide-y-transition>
           </v-card>
@@ -100,28 +99,19 @@ export default {
     item: 0,
     drawer: false,
     items: [
-      { text: "Сегодня", icon: "mdi-group", link: "/" },
+      { text: "Сегодня", icon: "mdi-clipboard-outline", link: "/" },
       { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
-      { text: "Дела", icon: "mdi-home", link: "/todo" }
+      { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
     ],
-    tasks: [
-      {
-        done: false,
-        text: 'Foobar'
-      },
-      {
-        done: false,
-        text: 'Fizzbuzz'
-      }
-    ],
+    tasks: [],
     task: null,
     elevation: 1,
   }),
   mounted() {
-    this.getEvents();
+    this.getTasks();
   },
   computed: {
-      completedTasks () {
+    completedTasks () {
       return this.tasks.filter(task => task.done).length
     },
     progress () {
@@ -132,26 +122,36 @@ export default {
     }
   },
   methods: {
-    async getEvents() {
-      let snapshot = await db.collection("calEvent").get();
-      let events = [];
+    async getTasks() {
+      let snapshot = await db.collection("todos").get();
+      let tasks = [];
 
       snapshot.forEach(doc => {
         let appData = doc.data();
         appData.id = doc.id;
-        events.push(appData);
+        tasks.push(appData);
       });
-      // events.map(item => this.events.push(item));
-      this.events = events;
-      console.log(this.events);
+      this.tasks = tasks;
     },
-    create () {
+    async create() {
+      let task = this.task;
+
       this.tasks.push({
         done: false,
-        text: this.task
+        text: task
       })
 
-      this.task = null
+      this.task = null;
+
+      await db.collection('todos').add({
+        done: false,
+        text: task
+      })
+    },
+    async completeTask(id, done) {
+      await db.collection('todos').doc(id).update({
+        done: done
+      });
     }
   }
 };
