@@ -28,7 +28,7 @@
             </div>
             <v-row v-else dense>
                 <v-col v-if="!events.length">
-                  <h2>Нет запланированных встреч на сегодня</h2>
+                  <p>Нет запланированных встреч на сегодня</p>
                 </v-col>
                 <v-col
                   v-for="(event, i) in events"
@@ -77,17 +77,6 @@ export default {
       { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
       { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
     ],
-    tasks: [
-      {
-        done: false,
-        text: 'Foobar'
-      },
-      {
-        done: false,
-        text: 'Fizzbuzz'
-      }
-    ],
-    task: null,
     elevation: 1,
     loading: true
   }),
