@@ -36,7 +36,7 @@
           <v-btn fab text small color="grey darken-2" class="mr-4" @click="next">
             <v-icon small>mdi-chevron-right</v-icon>
           </v-btn>
-          <v-toolbar-title>{{ title }}</v-toolbar-title>
+          <v-toolbar-title v-show="title != undefined">{{ title }}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-menu bottom right>
             <template v-slot:activator="{ on }">
@@ -197,7 +197,7 @@ export default {
       title () {
         const { start, end } = this
         if (!start || !end) {
-          return ''
+          return '';
         }
 
         const startMonth = this.monthFormatter(start)
