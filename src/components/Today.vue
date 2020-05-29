@@ -3,6 +3,15 @@
     <!-- Сайдбар -->
     <v-navigation-drawer v-model="drawer" app class="white">
       <v-list nav dense>
+        <v-list-item>
+          <v-list-item-avatar>
+            <v-img src="../../public/logo.png"></v-img>
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title>{{ email }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-divider class="mb-3"></v-divider>
         <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link">
           <v-list-item-icon>
             <v-icon v-text="item.icon"></v-icon>
@@ -19,6 +28,10 @@
           <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>
           <v-toolbar-title>Сегодня</v-toolbar-title>
           <v-spacer></v-spacer>
+          <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated">
+            <v-icon>exit_to_app</v-icon>
+            Выйти
+          </v-btn>
         </v-toolbar>
       </v-sheet>
       <template>
@@ -65,6 +78,7 @@
 
 <script>
 import { db } from "@/main";
+import Push from 'push.js';
 
 export default {
   name: 'Todo',
@@ -78,13 +92,33 @@ export default {
       { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
     ],
     elevation: 1,
-    loading: true
+    loading: true,
+    planning: [
+      {
+        title: 'Task #1', 
+        body: 'Body Task #1',
+        timeout: 10/60
+      }
+    ],
+    email: ''
   }),
+  beforeCreate() {
+    if(this.$store.getters.isUserAuthenticated !== true) {
+      this.$router.push('/auth');
+    }
+  },
+  beforeMount() {
+    this.eventIterator();
+  },
   mounted() {
     this.getEvents();
+    this.email = this.$store.getters.getEmail;
   },
   computed: {
-      completedTasks () {
+    isUserAuthenticated() {
+      return this.$store.getters.isUserAuthenticated;
+    },
+    completedTasks () {
       return this.tasks.filter(task => task.done).length
     },
     progress () {
@@ -94,7 +128,35 @@ export default {
       return this.tasks.length - this.completedTasks
     }
   },
+  watch: {
+    isUserAuthenticated(val) {
+      if (val !== true)
+        this.$router.push("/auth");
+    }
+  },
   methods: {
+    signOut() {
+      this.$store.dispatch('SIGNOUT'); 
+    },
+    eventIterator() {
+      if (!this.planning.length) return;
+      const vm = this;
+      this.planning.forEach(event => {
+        vm.createEvent(event);
+      });
+    },
+    createEvent(ev) {
+      setTimeout((ev) => {
+        Push.create(ev.title, {
+          body: ev.body,
+          icon: '../../public/calendar.png',
+          onClick: function () {
+            window.focus();
+            this.close();
+          }
+        });
+      }, this.planning[0].timeout * 1000 * 60, ev );
+    },
     async getEvents() {
       const regExp = /(\d{4}-\d{2}-\d{2})/g,
             currentDate = new Date().toJSON().slice(0,10).toString();
@@ -119,7 +181,7 @@ export default {
         }
       })
 
-      events = events.filter( item => item.start === currentDate )
+      events = events.filter( item => item.start === currentDate );
 
       this.events = events;
       this.loading = false;

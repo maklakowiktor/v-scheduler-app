@@ -177,6 +177,7 @@ export default {
         start: null,
         end: null,
         color: '#1976D2',
+        category: null,
         currentlyEditing: null,
         selectedEvent: {},
         selectedElement: null,
@@ -193,6 +194,11 @@ export default {
           { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
         ]
     }),
+    beforeCreate() {
+      if(this.$store.getters.isUserAuthenticated !== true) {
+        this.$router.push('/auth');
+      }
+    },
     computed: {
       title () {
         const { start, end } = this
@@ -258,7 +264,8 @@ export default {
             details: this.details,
             start: this.start,
             end: this.end,
-            color: this.color
+            color: this.color,
+            category: this.category
           })
           this.getEvents();
           this.name = '';
