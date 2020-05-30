@@ -2,16 +2,17 @@
   <v-row class="fill-height">
     <!-- Сайдбар -->
     <v-navigation-drawer v-model="drawer" app class="white">
-       <v-list
-        nav
-        dense
-      >
-        <v-list-item
-          v-for="(item, i) in items"
-          :key="i"
-          link
-          :to="item.link"
-        >
+      <v-list>
+        <v-list-item class="mb-2">
+          <v-list-item-avatar>
+            <v-img src="../../public/logo.png"></v-img>
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title>{{ email }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item >
+        <v-divider class="mb-3"></v-divider>
+        <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link">
           <v-list-item-icon>
             <v-icon v-text="item.icon"></v-icon>
           </v-list-item-icon>
@@ -20,6 +21,15 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated">
+            <v-icon>exit_to_app</v-icon>
+            Выйти
+          </v-btn>
+        </div>
+      </template>
     </v-navigation-drawer>
     <v-col>
       <v-sheet height="64">
@@ -192,14 +202,13 @@ export default {
           { text: "Сегодня", icon: "mdi-clipboard-outline", link: "/" },
           { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
           { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
-        ]
+        ],
+        email: null
     }),
-    beforeCreate() {
-      if(this.$store.getters.isUserAuthenticated !== true) {
-        this.$router.push('/auth');
-      }
-    },
     computed: {
+      isUserAuthenticated() {
+        return this.$store.getters.isUserAuthenticated;
+      },
       title () {
         const { start, end } = this
         if (!start || !end) {
@@ -235,10 +244,14 @@ export default {
       },
     },
     mounted() {
-        this.getEvents();
-        this.end = this.start = new Date().toJSON().slice(0, 10).toString() + 'T12:00';
+      this.getEvents();
+      this.email = this.$store.getters.getEmail;
+      this.end = this.start = new Date().toJSON().slice(0, 10).toString() + 'T12:00';
     },
     methods: {
+      signOut() {
+        this.$store.dispatch('SIGNOUT'); 
+      },
       alertErr() {
         this.errShow = true;
         setTimeout( () => {

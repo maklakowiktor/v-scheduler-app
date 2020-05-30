@@ -2,15 +2,15 @@
   <v-row class="fill-height">
     <!-- Сайдбар -->
     <v-navigation-drawer v-model="drawer" app class="white">
-      <v-list nav dense>
-        <v-list-item>
+      <v-list>
+        <v-list-item class="mb-2">
           <v-list-item-avatar>
             <v-img src="../../public/logo.png"></v-img>
           </v-list-item-avatar>
           <v-list-item-content>
             <v-list-item-title>{{ email }}</v-list-item-title>
           </v-list-item-content>
-        </v-list-item>
+        </v-list-item >
         <v-divider class="mb-3"></v-divider>
         <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link">
           <v-list-item-icon>
@@ -21,6 +21,15 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+      
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated">
+            <v-icon>exit_to_app</v-icon>
+            Выйти
+          </v-btn>
+        </div>
+      </template>
     </v-navigation-drawer>
     <v-col>
       <v-sheet :elevation="elevation" height="64">
@@ -28,10 +37,6 @@
           <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>
           <v-toolbar-title>Сегодня</v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated">
-            <v-icon>exit_to_app</v-icon>
-            Выйти
-          </v-btn>
         </v-toolbar>
       </v-sheet>
       <template>
@@ -102,11 +107,6 @@ export default {
     ],
     email: ''
   }),
-  beforeCreate() {
-    if(this.$store.getters.isUserAuthenticated !== true) {
-      this.$router.push('/auth');
-    }
-  },
   beforeMount() {
     this.eventIterator();
   },

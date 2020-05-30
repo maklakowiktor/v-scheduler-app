@@ -6,42 +6,55 @@ import Todo from './components/Todo.vue';
 import Today from './components/Today.vue';
 import SignIn from './components/SignIn.vue';
 import Register from './components/Register.vue';
+import Store from './store';
 
 Vue.use(VueRouter);
 
 const router = new VueRouter({
-    mode: 'history',
-    routes: [
-      {
-        name: 'Today',
-        path: '/',
-        component: Today
-      },
-      { 
-        name: 'Calendar',
-        path: '/calendar', 
-        component: Calendar
-      },
-      {
-        name: 'Todo',
-        path: '/todo',
-        component: Todo
-      },
-      {
-        name: 'SignIn',
-        path: '/auth',
-        component: SignIn
-      },
-      {
-        name: 'Register',
-        path: '/register',
-        component: Register
-      },
-      {
-        path: '/*',
-        redirect: '/'
-      }
-    ]
-  })
+  mode: 'history',
+  routes: [
+    {
+      name: 'Today',
+      path: '/',
+      component: Today,
+      beforeEnter: authGuard,
+      meta: { transition: 'fade-in-right' }
+    },
+    { 
+      name: 'Calendar',
+      path: '/calendar', 
+      component: Calendar,
+      beforeEnter: authGuard
+    },
+    {
+      name: 'Todo',
+      path: '/todo',
+      component: Todo,
+      beforeEnter: authGuard
+    },
+    {
+      name: 'SignIn',
+      path: '/auth',
+      component: SignIn
+    },
+    {
+      name: 'Register',
+      path: '/register',
+      component: Register
+    },
+    {
+      path: '/*',
+      redirect: '/'
+    }
+  ]
+})
+
+function authGuard(from, to, next) {
+  if (Store.getters.isUserAuthenticated)
+    next();
+  else
+    next('/auth');
+}
+
   
   export default router;

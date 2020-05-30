@@ -2,15 +2,16 @@
   <v-row class="fill-height">
     <!-- Сайдбар -->
     <v-navigation-drawer v-model="drawer" app class="white">
-      <v-list nav dense>
-        <v-list-item>
+      <v-list>
+        <v-list-item class="mb-2">
           <v-list-item-avatar>
-            <v-img src="https://randomuser.me/api/portraits/men/78.jpg"></v-img>
+            <v-img src="../../public/logo.png"></v-img>
           </v-list-item-avatar>
           <v-list-item-content>
             <v-list-item-title>{{ email }}</v-list-item-title>
           </v-list-item-content>
-        </v-list-item>
+        </v-list-item >
+        <v-divider class="mb-3"></v-divider>
         <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link">
           <v-list-item-icon>
             <v-icon v-text="item.icon"></v-icon>
@@ -20,6 +21,15 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated">
+            <v-icon>exit_to_app</v-icon>
+            Выйти
+          </v-btn>
+        </div>
+      </template>
     </v-navigation-drawer>
     <v-col>
       <v-sheet :elevation="elevation" height="64">
@@ -116,13 +126,9 @@ export default {
     elevation: 1,
     email: null
   }),
-  beforeCreate() {
-    if(this.$store.getters.isUserAuthenticated !== true) {
-      this.$router.push('/auth');
-    }
-  },
   mounted() {
     this.getTasks();
+    this.email = this.$store.getters.getEmail;
   },
   computed: {
     completedTasks () {
@@ -134,13 +140,13 @@ export default {
     remainingTasks () {
       return this.tasks.length - this.completedTasks
     },
-    email () {
-      return this.email = this.$store.getters.email;
-    }
+    isUserAuthenticated() {
+      return this.$store.getters.isUserAuthenticated;
+    },
   },
   methods: {
     async getTasks() {
-      let snapshot = await db.collection("todos").get();
+      let snapshot = await db.collection("todos").get(); // TODO: .where('', '==', this.email)
       let tasks = [];
 
       snapshot.forEach(doc => {
@@ -169,6 +175,9 @@ export default {
       await db.collection('todos').doc(id).update({
         done: done
       });
+    },
+    signOut() {
+      this.$store.dispatch('SIGNOUT'); 
     }
   }
 };

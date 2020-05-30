@@ -4,6 +4,7 @@ import App from './App.vue';
 import store from './store'
 import vuetify from './plugins/vuetify';
 import VueTextareaAutosize from 'vue-textarea-autosize';
+import VuePageTransition from 'vue-page-transition';
 import router from './router';
 import firebaseConfig from './config/firebase';
 import firebase from 'firebase/app';
@@ -11,10 +12,10 @@ import 'firebase/firestore';
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 
 Vue.use(VueTextareaAutosize);
+Vue.use(VuePageTransition);
 Vue.config.productionTip = false;
 
 firebase.initializeApp(firebaseConfig);
-firebase.firestore().settings({ experimentalForceLongPolling: true });
 
 export const db = firebase.firestore();
 
