@@ -1,81 +1,6 @@
 <template>
   <v-row class="fill-height">
-    <!-- Сайдбар -->
-    <v-navigation-drawer v-model="drawer" app class="white">
-      <v-list>
-        <v-list-item class="mb-2">
-          <v-list-item-avatar>
-            <v-img src="../../public/logo.png"></v-img>
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title>{{ email }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item >
-        <v-divider class="mb-3"></v-divider>
-        <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link">
-          <v-list-item-icon>
-            <v-icon v-text="item.icon"></v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.text"></v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-
-      <template v-slot:append>
-        <div class="pa-2">
-          <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated">
-            <v-icon>exit_to_app</v-icon>
-            Выйти
-          </v-btn>
-        </div>
-      </template>
-    </v-navigation-drawer>
-    <v-col>
-      <v-sheet height="64">
-        <v-toolbar flat color="white">
-          <!-- Sidebar btn -->
-          <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>
-
-          <!-- <v-btn color="" class="mr-4" @click="dialog = true" dark>+</v-btn> -->
-          
-          <v-btn outlined class="mr-4" @click="setToday">Сегодня</v-btn>
-          <v-btn fab text small color="grey darken-2" @click="prev">
-            <v-icon small>mdi-chevron-left</v-icon>
-          </v-btn>
-          <v-btn fab text small color="grey darken-2" class="mr-4" @click="next">
-            <v-icon small>mdi-chevron-right</v-icon>
-          </v-btn>
-          <v-toolbar-title v-show="title != undefined">{{ title }}</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-menu bottom right>
-            <template v-slot:activator="{ on }">
-              <v-btn
-                outlined
-                color="grey darken-2"
-                v-on="on"
-              >
-                <span>{{ typeToLabel[type] }}</span>
-                <v-icon right>mdi-menu-down</v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item @click="type = 'day'">
-                <v-list-item-title>День</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="type = 'week'">
-                <v-list-item-title>Неделя</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="type = 'month'">
-                <v-list-item-title>Месяц</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="type = '4day'">
-                <v-list-item-title>4 дня</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-toolbar>
-      </v-sheet>
+    <v-col class="pt-0">
       <!-- Предупреждение -->
       <v-slide-y-transition class="py-0">
         <v-alert type="error" v-show="errShow">
@@ -87,10 +12,16 @@
         <v-card>
           <v-container>
             <v-form @submit.prevent="addEvent">
-              <v-text-field v-model="name" type="text" label="Название (Обязательно)"></v-text-field>
+              <v-text-field v-model="name" type="text" label="Название *"></v-text-field>
               <v-text-field v-model="details" type="text" label="Описание"></v-text-field>
-              <v-text-field v-model="start" type="datetime-local" label="Начало (Обязательно)"></v-text-field>
-              <v-text-field v-model="end" type="datetime-local" label="Окончание (Обязательно)"></v-text-field>
+              <v-text-field v-model="start" type="datetime-local" label="Начало *"></v-text-field>
+              <v-text-field v-model="end" type="datetime-local" label="Окончание *"></v-text-field>
+              <v-select
+                v-model="category"
+                :items="categories"
+                label="Категория *"
+                color="success"
+              ></v-select>
               <v-text-field v-model="color" type="color" label="Цвет (Нажмите, чтобы открыть меню выбора цвета)"></v-text-field>
               <v-btn 
                 type="submit" 
@@ -110,6 +41,7 @@
           color="primary"
           :events="events"
           :event-color="getEventColor"
+          :event-margin-bottom="3"
           :now="today"
           :type="type"
           @click:event="showEvent"
@@ -164,14 +96,17 @@
       <v-btn fixed bottom right class="ma-5" fab dark color="indigo" @click="dialog = true">
         <v-icon dark>mdi-plus</v-icon>
       </v-btn>
-      
     </v-col>
   </v-row>
 </template>
 
 <script>
 import { db } from '@/main';
+import { mapState } from 'vuex';
+import {eventBus} from "@/main.js";
+
 export default {
+    name: 'Calendar',
     data: () => ({
         today: new Date().toISOString().substr(0, 10),
         focus: new Date().toISOString().substr(0, 10),
@@ -188,11 +123,11 @@ export default {
         end: null,
         color: '#1976D2',
         category: null,
+        categories: ["КФ", "Кл. рук"],
         currentlyEditing: null,
         selectedEvent: {},
         selectedElement: null,
         selectedOpen: false,
-        events: [],
         dialog: false,
         errShow: false,
         drawer: false,
@@ -203,9 +138,32 @@ export default {
           { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
           { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
         ],
-        email: null
     }),
+    created() {
+      eventBus.$on('eSetToday', () => {
+        this.setToday();
+      }),
+      eventBus.$on('ePrev', () => {
+        this.prev();
+      }),
+      eventBus.$on('eNext', () => {
+        this.next();
+      }),
+      eventBus.$on('eType', (type) => {
+        this.type = type;
+      })
+    },
+    mounted() {
+      this.getEvents();
+      this.end = this.start = new Date().toJSON().slice(0, 10).toString() + 'T12:00';
+    },
     computed: {
+      ...mapState([
+        'events'
+      ]),
+      events() {
+        return this.$store.getters.getEvents;
+      },
       isUserAuthenticated() {
         return this.$store.getters.isUserAuthenticated;
       },
@@ -241,34 +199,26 @@ export default {
         return this.$refs.calendar.getFormatter({
           timeZone: 'UTC', month: 'long',
         })
-      },
+      }
     },
-    mounted() {
-      this.getEvents();
-      this.email = this.$store.getters.getEmail;
-      this.end = this.start = new Date().toJSON().slice(0, 10).toString() + 'T12:00';
+    watch: {
+      isUserAuthenticated(val) {
+        if (val !== true)
+          this.$router.push("/auth");
+      },
+      title (val) {
+        eventBus.$emit('eTitle', val)
+      }
     },
     methods: {
-      signOut() {
-        this.$store.dispatch('SIGNOUT'); 
-      },
       alertErr() {
         this.errShow = true;
         setTimeout( () => {
           this.errShow = false;
         }, 3000)
       },
-      async getEvents() {
-        let snapshot = await db.collection("calEvent").get();
-        let events = [];
-        
-        snapshot.forEach(doc => {
-          let appData = doc.data();
-          appData.id = doc.id;
-          events.push(appData);
-        });
-        // events.map(item => this.events.push(item));
-        this.events = events;
+      getEvents () {
+        this.$store.dispatch('setEvents');
       },
       async addEvent() {
         if(this.name && this.start && this.end) {
@@ -317,7 +267,7 @@ export default {
         return event.color
       },
       setToday () {
-        this.focus = this.today
+        this.focus = this.today;
       },
       prev () {
         this.$refs.calendar.prev()
@@ -367,9 +317,6 @@ export default {
 </script>
 
 <style scoped>
-  .col {
-    padding: 0 12px 0 12px !important;
-  }
 
   .lightbox {
     box-shadow: 0 0 20px inset rgba(0, 0, 0, 0.2);

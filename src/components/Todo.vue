@@ -1,44 +1,6 @@
 <template>
   <v-row class="fill-height">
-    <!-- Сайдбар -->
-    <v-navigation-drawer v-model="drawer" app class="white">
-      <v-list>
-        <v-list-item class="mb-2">
-          <v-list-item-avatar>
-            <v-img src="../../public/logo.png"></v-img>
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title>{{ email }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item >
-        <v-divider class="mb-3"></v-divider>
-        <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link">
-          <v-list-item-icon>
-            <v-icon v-text="item.icon"></v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.text"></v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-
-      <template v-slot:append>
-        <div class="pa-2">
-          <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated">
-            <v-icon>exit_to_app</v-icon>
-            Выйти
-          </v-btn>
-        </div>
-      </template>
-    </v-navigation-drawer>
     <v-col>
-      <v-sheet :elevation="elevation" height="64">
-        <v-toolbar flat color="white">
-          <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>
-          <v-toolbar-title>Список задач</v-toolbar-title>
-          <v-spacer></v-spacer>
-        </v-toolbar>
-      </v-sheet>
       <template>
         <v-container style="max-width: 768px">
           <v-text-field
@@ -124,11 +86,9 @@ export default {
     tasks: [],
     task: null,
     elevation: 1,
-    email: null
   }),
   mounted() {
     this.getTasks();
-    this.email = this.$store.getters.getEmail;
   },
   computed: {
     completedTasks () {
@@ -143,6 +103,12 @@ export default {
     isUserAuthenticated() {
       return this.$store.getters.isUserAuthenticated;
     },
+  },
+  watch: {
+    isUserAuthenticated(val) {
+      if (val !== true)
+        this.$router.push("/auth");
+    }
   },
   methods: {
     async getTasks() {
@@ -184,9 +150,6 @@ export default {
 </script>
 
 <style scoped>
-.col {
-  padding: 0 12px 0 12px !important;
-}
 
 .lightbox {
   box-shadow: 0 0 20px inset rgba(0, 0, 0, 0.2);

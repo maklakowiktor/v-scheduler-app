@@ -18,29 +18,30 @@ const router = new VueRouter({
       path: '/',
       component: Today,
       beforeEnter: authGuard,
-      meta: { transition: 'fade-in-right' }
     },
     { 
       name: 'Calendar',
       path: '/calendar', 
       component: Calendar,
-      beforeEnter: authGuard
+      beforeEnter: authGuard,
     },
     {
       name: 'Todo',
       path: '/todo',
       component: Todo,
-      beforeEnter: authGuard
+      beforeEnter: authGuard,
     },
     {
       name: 'SignIn',
       path: '/auth',
-      component: SignIn
+      component: SignIn,
+      meta: { transition: 'none' },
     },
     {
       name: 'Register',
       path: '/register',
-      component: Register
+      component: Register,
+      meta: { transition: 'none' },
     },
     {
       path: '/*',

@@ -1,50 +1,12 @@
 <template>
   <v-row class="fill-height">
-    <!-- Сайдбар -->
-    <v-navigation-drawer v-model="drawer" app class="white">
-      <v-list>
-        <v-list-item class="mb-2">
-          <v-list-item-avatar>
-            <v-img src="../../public/logo.png"></v-img>
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title>{{ email }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item >
-        <v-divider class="mb-3"></v-divider>
-        <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link">
-          <v-list-item-icon>
-            <v-icon v-text="item.icon"></v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.text"></v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-      
-      <template v-slot:append>
-        <div class="pa-2">
-          <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated">
-            <v-icon>exit_to_app</v-icon>
-            Выйти
-          </v-btn>
-        </div>
-      </template>
-    </v-navigation-drawer>
     <v-col>
-      <v-sheet :elevation="elevation" height="64">
-        <v-toolbar flat color="white">
-          <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>
-          <v-toolbar-title>Сегодня</v-toolbar-title>
-          <v-spacer></v-spacer>
-        </v-toolbar>
-      </v-sheet>
-      <template>
-        <v-container>
-            <div class="loader-wrapper" v-if="loading">
+        <template>
+          <v-container>
+              <div class="loader-wrapper" v-if="loading">
                 <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
-            </div>
-            <v-row v-else dense>
+              </div>
+              <v-row v-else dense>
                 <v-col v-if="!events.length">
                   <p>Нет запланированных встреч на сегодня</p>
                 </v-col>
@@ -58,6 +20,7 @@
                 <v-card
                     :color="event.color"
                     dark
+                    draggable="true"
                 >
                     <div class="d-flex flex-no-wrap justify-space-between">
                         <div>
@@ -74,9 +37,9 @@
                     </div>
                 </v-card>
                 </v-col>
-            </v-row>
-        </v-container>
-      </template>
+              </v-row>
+          </v-container>
+        </template>
     </v-col>
   </v-row>
 </template>
@@ -86,7 +49,7 @@ import { db } from "@/main";
 import Push from 'push.js';
 
 export default {
-  name: 'Todo',
+  name: 'Today',
   data: () => ({
     events: [],
     item: 0,
@@ -105,14 +68,12 @@ export default {
         timeout: 10/60
       }
     ],
-    email: ''
   }),
   beforeMount() {
     this.eventIterator();
   },
   mounted() {
     this.getEvents();
-    this.email = this.$store.getters.getEmail;
   },
   computed: {
     isUserAuthenticated() {
@@ -199,9 +160,6 @@ export default {
 </script>
 
 <style scoped>
-.col {
-  padding: 0 12px 0 12px !important;
-}
 
 .lightbox {
   box-shadow: 0 0 20px inset rgba(0, 0, 0, 0.2);

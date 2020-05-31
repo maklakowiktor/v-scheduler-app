@@ -1,28 +1,26 @@
 <template>
-    <v-app>
+  <v-app>
       <v-content>
-        
+        <Menu />
+        <vue-page-transition name="fade-in-right" class="fill-height" fluid>
           <router-view></router-view>
-        
-        <!-- <Calendar/> -->
+        </vue-page-transition>
       </v-content>
-    </v-app>
+  </v-app>
 </template>
 
 <script>
-// import Calendar from './components/Calendar';
+import Menu from './components/Menu.vue';
 
 export default {
   name: 'App',
   components: {
-    // Calendar,
+    Menu
   },
   data: () => ({
-    //
   }),
 };
 </script>
 
-<style>
-  
+<style scoped>
 </style>

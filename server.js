@@ -19,6 +19,10 @@ app.get('/todo', (req, res) => {
     res.redirect('/todo');
 })
 
+app.get('/*', (req, res) => {
+    res.redirect('/');
+})
+
 app.listen(PORT, () => {
     console.log(`Server has been started on PORT: ${PORT}`);
 })
