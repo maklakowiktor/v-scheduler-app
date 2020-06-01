@@ -71,6 +71,7 @@
 
 <script>
 import { db } from "@/main";
+import {mapGetters} from 'vuex';
 
 export default {
   name: 'Todo',
@@ -83,14 +84,21 @@ export default {
       { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
       { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
     ],
-    tasks: [],
     task: null,
     elevation: 1,
+    time: null
   }),
   mounted() {
-    this.getTasks();
+    this.getTasks(this.$store.getters.authUser);
   },
   computed: {
+    // ...mapGetters('userModule', ['authUser']),
+    authUser() {
+      return this.$store.getters.authUser;
+    },
+    tasks() {
+      return this.$store.getters.getTodos;
+    },
     completedTasks () {
       return this.tasks.filter(task => task.done).length
     },
@@ -111,16 +119,8 @@ export default {
     }
   },
   methods: {
-    async getTasks() {
-      let snapshot = await db.collection("todos").get(); // TODO: .where('', '==', this.email)
-      let tasks = [];
-
-      snapshot.forEach(doc => {
-        let appData = doc.data();
-        appData.id = doc.id;
-        tasks.push(appData);
-      });
-      this.tasks = tasks;
+    async getTasks(uid) {
+      this.$store.dispatch('setTodos', this.authUser.uid);
     },
     async create() {
       let task = this.task;
@@ -134,7 +134,8 @@ export default {
 
       await db.collection('todos').add({
         done: false,
-        text: task
+        text: task,
+        ownerUid: this.authUser.uid
       })
     },
     async completeTask(id, done) {

@@ -51,7 +51,6 @@ import Push from 'push.js';
 export default {
   name: 'Today',
   data: () => ({
-    events: [],
     item: 0,
     drawer: false,
     items: [
@@ -60,7 +59,7 @@ export default {
       { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
     ],
     elevation: 1,
-    loading: true,
+    loading: false,
     planning: [
       {
         title: 'Task #1', 
@@ -76,17 +75,11 @@ export default {
     this.getEvents();
   },
   computed: {
+    events() {      
+      return this.$store.getters.getFormatedEvents;
+    },
     isUserAuthenticated() {
       return this.$store.getters.isUserAuthenticated;
-    },
-    completedTasks () {
-      return this.tasks.filter(task => task.done).length
-    },
-    progress () {
-      return this.completedTasks / this.tasks.length * 100
-    },
-    remainingTasks () {
-      return this.tasks.length - this.completedTasks
     }
   },
   watch: {
@@ -110,7 +103,7 @@ export default {
       setTimeout((ev) => {
         Push.create(ev.title, {
           body: ev.body,
-          icon: '../../public/calendar.png',
+          icon: '../assets/calendar.png',
           onClick: function () {
             window.focus();
             this.close();
@@ -118,34 +111,8 @@ export default {
         });
       }, this.planning[0].timeout * 1000 * 60, ev );
     },
-    async getEvents() {
-      const regExp = /(\d{4}-\d{2}-\d{2})/g,
-            currentDate = new Date().toJSON().slice(0,10).toString();
-
-      let snapshot = await db.collection("calEvent").get(),
-          events = [];
-      
-      snapshot.forEach(doc => {
-        let appData = doc.data();
-        appData.id = doc.id;
-        events.push(appData);
-      });
-      
-      events.map((event) => {
-        for ( let key in event ) {
-          let fieldStart = event[key];
-
-          if ( key === 'start' ) {
-            let arrField = fieldStart.match(regExp);
-            event[key] = arrField[0];
-          }
-        }
-      })
-
-      events = events.filter( item => item.start === currentDate );
-
-      this.events = events;
-      this.loading = false;
+    getEvents() {
+      this.$store.dispatch('setEvents');
     },
     create () {
       this.tasks.push({

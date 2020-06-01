@@ -5,7 +5,9 @@ export default {
         user: {
             isAuthenticated: false,
             uid: null,
-            email: 'e-mail'
+            email: 'e-mail',
+            intials: null,
+            division: null
         },
     },
     mutations: {
@@ -63,7 +65,8 @@ export default {
         }
     },
     getters: {
-        isUserAuthenticated: (state) => state.user.isAuthenticated,
-        getEmail: (state) => state.user.email
+        isUserAuthenticated: (state) => state.user.isAuthenticated, // ! TODO: Delete
+        getEmail: (state) => state.user.email, // ! TODO: Delete 
+        authUser: state => state.user, // TODO: Keep
     }
 }

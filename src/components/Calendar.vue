@@ -12,17 +12,30 @@
         <v-card>
           <v-container>
             <v-form @submit.prevent="addEvent">
-              <v-text-field v-model="name" type="text" label="Название *"></v-text-field>
-              <v-text-field v-model="details" type="text" label="Описание"></v-text-field>
-              <v-text-field v-model="start" type="datetime-local" label="Начало *"></v-text-field>
-              <v-text-field v-model="end" type="datetime-local" label="Окончание *"></v-text-field>
+              <v-text-field v-model="name" type="text" label="Название *" required></v-text-field>
+              <v-text-field v-model="details" type="text" label="Описание" required></v-text-field>
+              <v-text-field v-model="start" type="datetime-local" label="Начало *" required></v-text-field>
+              <v-text-field v-model="end" type="datetime-local" label="Окончание *" required></v-text-field>
               <v-select
                 v-model="category"
                 :items="categories"
                 label="Категория *"
                 color="success"
+                required
               ></v-select>
-              <v-text-field v-model="color" type="color" label="Цвет (Нажмите, чтобы открыть меню выбора цвета)"></v-text-field>
+              <v-text-field v-model="geo" type="text" label="Местоположение"></v-text-field>
+              <v-text-field v-model="duration" type="text" label="Длительность"></v-text-field>
+              <v-text-field
+                v-model="color" 
+                type="color" 
+                label="Цвет (Нажмите, чтобы открыть меню выбора цвета)"
+                :outlined="true"
+                :background-color="color"
+                height="5"
+                :dense="true"
+                full-width
+                size="5"
+              >Выбрать цвет</v-text-field>
               <v-btn 
                 type="submit" 
                 color="primary" 
@@ -49,21 +62,9 @@
           @click:date="viewDay"
           @change="updateRange"
         ></v-calendar>
-        <v-menu
-          v-model="selectedOpen"
-          :close-on-content-click="false"
-          :activator="selectedElement"
-          offset-x
-        >
-          <v-card
-            color="grey lighten-4"
-            min-width="350px"
-            flat
-          >
-            <v-toolbar
-              :color="selectedEvent.color"
-              dark
-            >
+        <v-menu v-model="selectedOpen" :close-on-content-click="false" :activator="selectedElement" offset-x>
+          <v-card color="grey lighten-4" min-width="350px" flat>
+            <v-toolbar :color="selectedEvent.color" dark>
               <v-btn @click="deleteEvent(selectedEvent.id)" icon>
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
@@ -93,7 +94,8 @@
           </v-card>
         </v-menu>
       </v-sheet>
-      <v-btn fixed bottom right class="ma-5" fab dark color="indigo" @click="dialog = true">
+
+      <v-btn fixed bottom right class="ma-5" fab dark color="indigo" @click="openDialog">
         <v-icon dark>mdi-plus</v-icon>
       </v-btn>
     </v-col>
@@ -109,13 +111,13 @@ export default {
     name: 'Calendar',
     data: () => ({
         today: new Date().toISOString().substr(0, 10),
-        focus: new Date().toISOString().substr(0, 10),
+        focus: new Date().toISOString().substr(0, 10), 
         type: 'month',
         typeToLabel: {
-            month: 'Месяц',
-            week: 'Неделя',
-            day: 'День',
-            "4day": '4 дня'
+          month: 'Месяц',
+          week: 'Неделя',
+          day: 'День',
+          "4day": '4 дня'
         },
         name: null,
         details: null,
@@ -123,7 +125,8 @@ export default {
         end: null,
         color: '#1976D2',
         category: null,
-        categories: ["КФ", "Кл. рук"],
+        geo: null,
+        duration: null,
         currentlyEditing: null,
         selectedEvent: {},
         selectedElement: null,
@@ -155,17 +158,23 @@ export default {
     },
     mounted() {
       this.getEvents();
-      this.end = this.start = new Date().toJSON().slice(0, 10).toString() + 'T12:00';
     },
     computed: {
-      ...mapState([
-        'events'
-      ]),
+      categories() {
+        let filterCats = []
+        this.$store.getters.getCategories.map( cat => {
+          filterCats.push(cat.category);
+        });
+        return filterCats;
+      },
       events() {
         return this.$store.getters.getEvents;
       },
       isUserAuthenticated() {
         return this.$store.getters.isUserAuthenticated;
+      },
+      authUser() {
+        return this.$store.getters.authUser;
       },
       title () {
         const { start, end } = this
@@ -175,6 +184,7 @@ export default {
 
         const startMonth = this.monthFormatter(start)
         const endMonth = this.monthFormatter(end)
+
         const suffixMonth = startMonth === endMonth ? '' : endMonth
 
         const startYear = start.year
@@ -183,6 +193,8 @@ export default {
 
         const startDay = start.day + this.nth(start.day)
         const endDay = end.day + this.nth(end.day)
+
+        // this.end = this.start = new Date().toJSON().slice(0, 10).toString() + 'T12:00';
 
         switch (this.type) {
           case 'month':
@@ -195,7 +207,7 @@ export default {
         }
         return ''
       },
-      monthFormatter () {
+      monthFormatter (d) {
         return this.$refs.calendar.getFormatter({
           timeZone: 'UTC', month: 'long',
         })
@@ -220,21 +232,29 @@ export default {
       getEvents () {
         this.$store.dispatch('setEvents');
       },
+      openDialog() {
+        // this.end = this.start = new Date().toJSON().slice(0, 10).toString() + 'T12:00';
+        this.dialog = true;
+      },
       async addEvent() {
-        if(this.name && this.start && this.end) {
+        if(this.name && this.start && this.end && this.category) {
           await db.collection('calEvent').add({
             name: this.name,
             details: this.details,
             start: this.start,
             end: this.end,
             color: this.color,
-            category: this.category
+            category: this.category,
+            geo: this.geo,
+            ownerUid: this.authUser.uid
           })
           this.getEvents();
           this.name = '';
           this.details = '';
-          this.start = '';
           this.end = '';
+          this.start = '';
+          this.category = '';
+          this.geo = '';
           this.color = '#1976D2';
         } else {
           this.alertErr();
@@ -301,8 +321,8 @@ export default {
       },
       nth (d) {
         return d > 3 && d < 21
-          ? 'th'
-          : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][d % 10]
+          ? 'е'
+          : ['е', 'е', 'е', 'е', 'е', 'е', 'е', 'е', 'е', 'е'][d % 10]
       },
       rnd (a, b) {
         return Math.floor((b - a + 1) * Math.random()) + a

@@ -11,14 +11,6 @@ app.get('/', (req, res) => {
     res.redirect('/');
 })
 
-app.get('/calendar', (req, res) => {
-    res.redirect('/calendar');
-})
-
-app.get('/todo', (req, res) => {
-    res.redirect('/todo');
-})
-
 app.get('/*', (req, res) => {
     res.redirect('/');
 })
