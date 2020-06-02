@@ -6,7 +6,7 @@ export default {
             isAuthenticated: false,
             uid: null,
             email: 'e-mail',
-            intials: null,
+            initials: 'initials',
             division: null
         },
     },

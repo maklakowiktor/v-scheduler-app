@@ -15,6 +15,16 @@ Vue.use(VueTextareaAutosize);
 Vue.use(VuePageTransition);
 Vue.config.productionTip = false;
 
+const ignoreWarnMessage = 'The .native modifier for v-on is only valid on components but it was used on <div>.';
+Vue.config.warnHandler = function (msg, vm, trace) {
+  // `trace` is the component hierarchy trace
+  if (msg === ignoreWarnMessage) {
+    msg = null;
+    vm = null;
+    trace = null;
+  }
+}
+
 firebase.initializeApp(firebaseConfig);
 
 export const db = firebase.firestore();

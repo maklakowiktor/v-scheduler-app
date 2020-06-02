@@ -10,33 +10,61 @@
                 <v-col v-if="!events.length">
                   <p>Нет запланированных встреч на сегодня</p>
                 </v-col>
-                <v-col
+                <!-- <v-col
                   v-for="(event, i) in events"
                   :key="i"
                   cols="12"
                   class="ma-3"
                   v-else
-                >
-                <v-card
-                    :color="event.color"
-                    dark
-                    draggable="true"
-                >
-                    <div class="d-flex flex-no-wrap justify-space-between">
-                        <div>
-                            <v-card-title
-                            class="headline"
-                            v-text="event.name"
-                            ></v-card-title>
+                > -->
+                  <!-- <v-card
+                      :color="event.color"
+                      dark
+                      draggable="true"
+                  >
+                      <div class="d-flex flex-no-wrap justify-space-between">
+                          <div>
+                              <v-card-title class="headline">
+                                <v-col cols="22" sm="6" md="4" lg="10">
+                                  {{event.name}}
+                                </v-col>
+                                <v-col cols="22" sm="6" md="4" lg="2">
+                                  <v-chip outlined>
+                                    {{ event.category }}
+                                  </v-chip>
+                                </v-col>
+                              </v-card-title>
+                              
+                              <v-card-subtitle v-text="event.details"></v-card-subtitle>
+                          </div>
+                          <div>
+                              <v-card-subtitle v-text="event.start"></v-card-subtitle>
+                          </div>
+                      </div>
+                  </v-card> -->
+                  <v-card-text v-for="(event, i) in events" :key="i" class="py-0" v-else>
+                    <v-timeline
+                      align-top
+                      dense
+                    >
+                      <v-timeline-item
+                        :color="event.color"
+                        small
+                      >
+                        <v-row class="pt-1">
+                          <v-col cols="3">
+                            <strong>{{ event.end | filterTime }}</strong>
+                          </v-col>
+                          <v-col>
+                            <strong>{{ event.name }}</strong>
+                            <div class="caption">{{ event.details }}</div>
+                          </v-col>
+                        </v-row>
+                      </v-timeline-item>
 
-                            <v-card-subtitle v-text="event.details"></v-card-subtitle>
-                        </div>
-                        <div>
-                            <v-card-subtitle v-text="event.start"></v-card-subtitle>
-                        </div>
-                    </div>
-                </v-card>
-                </v-col>
+                    </v-timeline>
+                  </v-card-text>
+                <!-- </v-col> -->
               </v-row>
           </v-container>
         </template>
@@ -45,8 +73,6 @@
 </template>
 
 <script>
-import { db } from "@/main";
-import Push from 'push.js';
 
 export default {
   name: 'Today',
@@ -60,16 +86,8 @@ export default {
     ],
     elevation: 1,
     loading: false,
-    planning: [
-      {
-        title: 'Task #1', 
-        body: 'Body Task #1',
-        timeout: 10/60
-      }
-    ],
   }),
   beforeMount() {
-    this.eventIterator();
   },
   mounted() {
     this.getEvents();
@@ -92,35 +110,17 @@ export default {
     signOut() {
       this.$store.dispatch('SIGNOUT'); 
     },
-    eventIterator() {
-      if (!this.planning.length) return;
-      const vm = this;
-      this.planning.forEach(event => {
-        vm.createEvent(event);
-      });
-    },
-    createEvent(ev) {
-      setTimeout((ev) => {
-        Push.create(ev.title, {
-          body: ev.body,
-          icon: '../assets/calendar.png',
-          onClick: function () {
-            window.focus();
-            this.close();
-          }
-        });
-      }, this.planning[0].timeout * 1000 * 60, ev );
-    },
     getEvents() {
       this.$store.dispatch('setEvents');
-    },
-    create () {
-      this.tasks.push({
-        done: false,
-        text: this.task
-      })
+    }
+  },
+  filters: {
+    filterTime: v => {
+      if (!v) return '';
+      let pos = v.indexOf('T');
+      v = v.split('').splice(pos + 1, pos).join().replace(/,/g, '');
 
-      this.task = null
+      return v;
     }
   }
 };

@@ -1,15 +1,15 @@
 <template>
     <v-row fixed>
     <!-- Сайдбар -->
-        <v-navigation-drawer v-model="drawer" app class="white" v-if="isUserAuthenticated">
-        <v-list class="mt-0">
-            <v-list-item class="mb-0">
-            <v-list-item-avatar class="mb-4">
-                <v-img src="../../public/logo.png"></v-img>
-            </v-list-item-avatar>
-            <v-list-item-content>
-                <v-list-item-title>{{ email }}</v-list-item-title>
-            </v-list-item-content>
+        <v-navigation-drawer v-model="drawer" app class="white pt-0" v-if="isUserAuthenticated">
+        <v-list class="mt-0 pt-0">
+            <v-list-item class="mb-0 pt-2" link to="/profile">
+                <v-list-item-avatar class="mb-4">
+                    <v-img :src="require('../assets/logo.png')"></v-img>
+                </v-list-item-avatar>
+                <v-list-item-content class="mb-2">
+                    <v-list-item-title>{{ authUser.initials }}</v-list-item-title>
+                </v-list-item-content>
             </v-list-item >
             <v-divider class=""></v-divider>
             <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link">
@@ -21,20 +21,6 @@
                 </v-list-item-content>
             </v-list-item>
         </v-list>
-        <!-- <v-row justify="space-around">
-            <v-col cols="12" sm="6" md="4" lg="10">
-            <v-sheet elevation="0" class="pa-4">
-                <v-chip-group
-                column
-                active-class="primary--text"
-                >
-                <v-chip v-for="tag in tags" :key="tag" :color="tag.color" :text-color="tag.textcolor">
-                    {{ tag.name }}
-                </v-chip>
-                </v-chip-group>
-            </v-sheet>
-            </v-col>
-        </v-row> -->
         <template v-slot:append>
             <div class="pa-2">
                 <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated">
@@ -48,13 +34,13 @@
         <v-col class="mb-0 pt-0 pb-0">
             <v-sheet :elevation="elevation" height="72" v-if="isUserAuthenticated" tile>
                 <!-- Today component menu -->
-                <v-toolbar flat color="white" class="today-component" v-if="currentRoute == 'Today'">
+                <v-toolbar flat color="white" class="today-component pt-1" v-if="currentRoute == 'Today'">
                     <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>
                     <v-toolbar-title>Сегодня</v-toolbar-title>
                     <v-spacer></v-spacer>
                 </v-toolbar>
                 <!-- Calendar component menu -->
-                <v-toolbar flat color="white" v-else-if="currentRoute == 'Calendar'">
+                <v-toolbar class="pt-1" flat color="white" v-else-if="currentRoute == 'Calendar'">
                     <!-- Sidebar btn -->
                     <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>                    
                     <v-btn outlined class="mr-4" @click="setToday">Сегодня</v-btn>
@@ -74,39 +60,41 @@
                         >
                             <template v-slot:activator="{ on }">
                                 <v-btn
-                                outlined
-                                color="indigo"
-                                dark
-                                v-on="on"
+                                    outlined
+                                    color="indigo"
+                                    dark
+                                    v-on="on"
                                 >
                                     <v-icon>mdi-filter-outline</v-icon>
                                 </v-btn>
                             </template>
 
-                            <v-card max-height="70vh">
+                            <v-card max-height="70vh" max-width="30vw">
                                 <v-col cols="12" sm="6" md="4" lg="12">
-                                    <v-sheet elevation="0" class="pa-4">
+                                    <v-sheet elevation="0" class="pa-4" justify="end">
                                         <h3 class="mb-1">Фильтрация по категории:</h3>
                                         <v-chip-group
                                             column
                                             active-class="primary--text"
+                                            justify="end"
                                         >
-                                            <v-chip v-for="(tag, idx) in categories" :key="idx" :color="tag.color">
+                                            <v-chip v-for="(tag, idx) in categories" :key="idx" :color="tag.color" @click="filterEvents(tag.category)">
                                                 {{ tag.category }}
                                             </v-chip>
                                         </v-chip-group>
-                                        <v-chip outlined color="primary">
-                                                <v-icon>mdi-plus</v-icon>
-                                        </v-chip>
+                                        <v-btn class="mr-3" color="primary" dark height="30" outlined rounded @click="dialog = true">
+                                            <v-icon>mdi-plus</v-icon>
+                                        </v-btn>
+                                        <v-btn color="primary" dark height="30" outlined rounded @click="resetFilters" :disabled="filtered">
+                                            <v-icon>mdi-undo</v-icon>
+                                        </v-btn>
                                     </v-sheet>
                                 </v-col>
                             </v-card>
 
                         </v-menu>
                     </div>
-                    <!-- <v-spacer></v-spacer> -->
-
-                    <v-menu bottom right>
+                    <v-menu bottom right nudge-right>
                         <template v-slot:activator="{ on }">
                             <v-btn
                                 outlined
@@ -133,22 +121,52 @@
                         </v-list>
                     </v-menu>
                 </v-toolbar>
-                <!-- Todo list component -->
-                <v-toolbar flat color="white" v-else-if="currentRoute == 'Todo'">
+
+                <v-toolbar class="pt-1" flat color="white" v-else-if="currentRoute == 'Todo'">
                     <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>
                     <v-toolbar-title>Список задач</v-toolbar-title>
                     <v-spacer></v-spacer>
                 </v-toolbar>
 
+                <v-toolbar class="pt-1" flat color="white" v-else-if="currentRoute == 'Profile'">
+                    <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>
+                    <v-toolbar-title>Профиль</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                </v-toolbar>
+
             </v-sheet>
         </v-col>
-        <!-- End top menu -->
+        <v-dialog v-model="dialog" persistent max-width="400px">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Добавить категорию</span>
+                </v-card-title>
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <v-col cols="12" sm="6" md="12">
+                                <v-text-field v-model="category" label="Название" required :rules="fieldRule"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6" md="12">
+                                <v-text-field type="color" v-model="color" label="Цвет" required :rules="fieldRule"></v-text-field>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="dialog = false; category = null">Закрыть</v-btn>
+                    <v-btn color="blue darken-1" text @click="addCategory" :disabled="category && color">Сохранить</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </v-row>
 </template>
 
 <script>
 import Calendar from './Calendar';
 import {eventBus} from "@/main.js";
+import { db } from '@/main';
 
 export default {
     name: 'Menu',
@@ -161,7 +179,6 @@ export default {
             { text: "Список задач", icon: "mdi-check-circle-outline", link: "/todo" }
         ],
         elevation: 1,
-        // email: null,
         type: 'month',
         typeToLabel: {
             month: 'Месяц',
@@ -173,14 +190,22 @@ export default {
         menu: false,
         message: false,
         hints: true,
+        dialog: false,
+        filtered: false,
+        category: null,
+        color: null,
+        fieldRule: [
+            (v) => !!v || 'Заполните поле'
+        ]
     }),
     created() {
         eventBus.$on('eTitle', (val) => {
             return this.title = val;
         })
+        this.$store.dispatch('uploadEvents');
     },
     mounted() {
-        this.$store.dispatch('setCategories');
+        this.$store.dispatch('setCategories');  
     },
     computed: {
         categories() {
@@ -192,17 +217,15 @@ export default {
         isUserAuthenticated() {
             return this.$store.getters.isUserAuthenticated;
         },
-        email() {
-            return this.$store.getters.getEmail;
-        },
         authUser() {
             return this.$store.getters.authUser;
         },
     },
     watch: {
         isUserAuthenticated(val) {
-            if (val !== true)
+            if ( val !== true ) {
                 this.$router.push("/auth");
+            }
         },
     },
     methods: {
@@ -222,6 +245,22 @@ export default {
         signOut() {
             this.$store.dispatch('SIGNOUT'); 
         },
+        filterEvents(category) {
+            this.$store.dispatch('SORT_EVENTS', category);
+            this.filtered = true; // TODO: Не работает
+        },
+        resetFilters() {
+            this.$store.dispatch('RESET_EVENTS');
+            this.filtered = false;
+        },
+        async addCategory() {
+            await db.collection('categories').add({ // TODO: Add snapshot realtime on categories vuex
+                category: this.name,
+                color: this.color,
+                onwerUid: this.authUser.uid
+            })
+            this.dialog = false;
+        }
     }
 }
 </script>

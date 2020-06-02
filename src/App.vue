@@ -2,7 +2,7 @@
   <v-app>
       <v-content>
         <Menu />
-        <vue-page-transition name="fade-in-right" class="fill-height" fluid>
+        <vue-page-transition name="fade-in-right">
           <router-view></router-view>
         </vue-page-transition>
       </v-content>

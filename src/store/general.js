@@ -3,6 +3,7 @@ import { db } from '@/main';
 export default {
     state: {
         events: [],
+        initEvents: [],
         todos: [],
         categories: [],
         processing: false,
@@ -20,6 +21,7 @@ export default {
         },
         SET_EVENTS: (state, events) => {
             state.events = events;
+            state.initEvents = events;
         },
         SET_TODOS: (state, todos) => {
             state.todos = todos;
@@ -27,6 +29,12 @@ export default {
         SET_CATEGORIES: (state, cats) => {
             state.categories = cats;
         },
+        FILTER_EVENTS: (state, events) => {
+            state.events = events;
+        },
+        RESET_EVENTS: (state) => {
+            state.events = state.initEvents; 
+        }
     },
     actions: {
         setEvents: async context => {
@@ -58,6 +66,14 @@ export default {
                 categories.push(appData)
             });
             context.commit('SET_CATEGORIES', categories);
+        },
+        SORT_EVENTS: ({state, commit}, category) => {
+            commit('RESET_EVENTS');
+            
+            const initEvents = state.initEvents;
+            const filteredEvents = initEvents.filter(event => event.category === category);
+            
+            commit('FILTER_EVENTS', filteredEvents);
         }
     },
     getters: {

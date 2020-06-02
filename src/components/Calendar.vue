@@ -20,11 +20,10 @@
                 v-model="category"
                 :items="categories"
                 label="Категория *"
-                color="success"
                 required
               ></v-select>
               <v-text-field v-model="geo" type="text" label="Местоположение"></v-text-field>
-              <v-text-field v-model="duration" type="text" label="Длительность"></v-text-field>
+              <v-text-field v-model="duration" type="number" min="0" max="60" label="Надпомнить через (мин.)"></v-text-field>
               <v-text-field
                 v-model="color" 
                 type="color" 
@@ -70,9 +69,15 @@
               </v-btn>
               <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
               <v-spacer></v-spacer>
+              <v-chip outlined>{{ selectedEvent.category }}</v-chip>
             </v-toolbar>
             <v-card-text>
-              <form v-if="currentlyEditing !== selectedEvent.id">
+                <span>
+                  <v-icon>mdi-earth</v-icon>
+                  {{ selectedEvent.geo }}
+                </span>
+                <v-divider ></v-divider>
+              <form v-if="currentlyEditing !== selectedEvent.id" class="mt-3">
                 {{ selectedEvent.details }}
               </form>
               <form v-else>
@@ -81,7 +86,8 @@
                   type="text"
                   style="width: 100%"
                   :min-height="100"
-                  placeholder="Добавить заметку" 
+                  placeholder="Добавить заметку"
+                  class="mt-3"
                 ></textarea-autosize>
               </form>
             </v-card-text>
@@ -246,6 +252,7 @@ export default {
             color: this.color,
             category: this.category,
             geo: this.geo,
+            duration: parseInt(this.duration),
             ownerUid: this.authUser.uid
           })
           this.getEvents();
@@ -255,6 +262,7 @@ export default {
           this.start = '';
           this.category = '';
           this.geo = '';
+          this.duration= '';
           this.color = '#1976D2';
         } else {
           this.alertErr();

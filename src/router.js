@@ -6,6 +6,7 @@ import Todo from './components/Todo.vue';
 import Today from './components/Today.vue';
 import SignIn from './components/SignIn.vue';
 import Register from './components/Register.vue';
+import Profile from './components/Profile.vue';
 import Store from './store';
 
 Vue.use(VueRouter);
@@ -44,6 +45,12 @@ const router = new VueRouter({
       meta: { transition: 'none' },
     },
     {
+      name: 'Profile',
+      path: '/profile',
+      component: Profile,
+      beforeEnter: authGuard
+    },
+    {
       path: '/*',
       redirect: '/'
     }
@@ -51,6 +58,9 @@ const router = new VueRouter({
 })
 
 function authGuard(from, to, next) {
+  if (from.name === 'Calendar') Store.dispatch('setCategories');
+
+  Store.dispatch('setCategories');
   if (Store.getters.isUserAuthenticated)
     next();
   else
