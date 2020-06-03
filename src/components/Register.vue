@@ -104,7 +104,14 @@
     },
     methods: {
       signUp() {
-        this.$store.dispatch('SIGNUP', {email: this.email, password: this.password});
+        this.$store.dispatch('SIGNUP', {
+          email: this.email,
+          password: this.password, 
+          surname: this.surname, 
+          name: this.name, 
+          patronymic: this.patronymic, 
+          position: this.position,
+        });
       }
     }
   }

@@ -10,14 +10,20 @@
                         <!-- <v-btn @click="openAvatarPicker">Изменить аватар</v-btn> -->
                     </v-flex>
                     <v-text-field
-                        v-model="form.initials"
-                        label="FirstName"></v-text-field>
+                        v-model="form.initials "
+                        label="ФИО"
+                        readonly>
+                    </v-text-field>
                     <v-text-field
                         v-model="form.initials"
-                        label="Last Name"></v-text-field>
+                        label="Должность"
+                        readonly>
+                    </v-text-field>
                     <v-text-field
                         v-model="form.email"
-                        label="Email Address"></v-text-field>
+                        label="Электронная почта"
+                        readonly>
+                    </v-text-field>
                 </v-card-text>
                 <v-card-actions>
                     <v-btn color="primary" :loading="loading" @click.native="update" disabled>
@@ -36,15 +42,22 @@ export default {
     name: 'Profile',
     data: () => ({
         loading: false,
-        form: {},
+        form: {
+            initials: '',
+            email: ''
+        },
         showAvatarPicker: false
     }),
+    mounted() {
+        this.form = this.authUser;
+    },
     computed: {
         isUserAuthenticated() {
             return this.$store.getters.isUserAuthenticated;
         },
         authUser() {
-            return this.form = this.$store.getters.authUser;
+            this.form = this.$store.getters.authUser;
+            return this.$store.getters.authUser;
         }
     },
     methods: {
@@ -56,6 +69,12 @@ export default {
         },
         async update () {
             console.log(this.form);
+        }
+    },
+    filters: {
+        filterInitials: (ev) => {
+            let pos = ev.indexOf('&');
+            return ev.slice(0, pos);
         }
     }
 }

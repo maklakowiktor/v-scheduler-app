@@ -8,7 +8,7 @@
                     <v-img :src="require('../assets/logo.png')"></v-img>
                 </v-list-item-avatar>
                 <v-list-item-content class="mb-2">
-                    <v-list-item-title>{{ authUser.initials }}</v-list-item-title>
+                    <v-list-item-title>{{ authUser.initials | filterInitials }}</v-list-item-title>
                 </v-list-item-content>
             </v-list-item >
             <v-divider class=""></v-divider>
@@ -156,10 +156,24 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="dialog = false; category = null">Закрыть</v-btn>
-                    <v-btn color="blue darken-1" text @click="addCategory" :disabled="category && color">Сохранить</v-btn>
+                    <v-btn color="blue darken-1" text @click="addCategory" :disabled="!(category && color)">Сохранить</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+        <v-snackbar
+            v-model="snackbar"
+            timeout="4000"
+        >
+            {{ text }}
+            <v-btn
+                color="blue"
+                text
+                @click="snackbar = false"
+            >
+                Close
+            </v-btn>
+        </v-snackbar>
     </v-row>
 </template>
 
@@ -191,18 +205,29 @@ export default {
         message: false,
         hints: true,
         dialog: false,
-        filtered: false,
+        filtered: true,
         category: null,
-        color: null,
+        color: '#0e1cff',
         fieldRule: [
             (v) => !!v || 'Заполните поле'
-        ]
+        ],
+        snackbar: false,
     }),
     created() {
         eventBus.$on('eTitle', (val) => {
             return this.title = val;
         })
-        this.$store.dispatch('uploadEvents');
+        if(this.$store.getters.isUserAuthenticated === true) this.$store.dispatch('uploadEvents');
+
+        if (window.Notification && Notification.permission !== "granted") {
+            Notification.requestPermission((status) => {
+                console.log('Статус уведомлений: ', status);
+            })
+        } else if(!window.Notification) {
+            console.log('Ваш браузер не поддерживает уведомления');
+        } else {
+            console.log('Уведомления включены', window.Notification.permission);
+        }
     },
     mounted() {
         this.$store.dispatch('setCategories');  
@@ -247,19 +272,26 @@ export default {
         },
         filterEvents(category) {
             this.$store.dispatch('SORT_EVENTS', category);
-            this.filtered = true; // TODO: Не работает
+            this.filtered = false; // TODO: Не работает
         },
         resetFilters() {
-            this.$store.dispatch('RESET_EVENTS');
-            this.filtered = false;
+            this.$store.commit('RESET_EVENTS');
+            this.filtered = true;
         },
         async addCategory() {
             await db.collection('categories').add({ // TODO: Add snapshot realtime on categories vuex
-                category: this.name,
+                category: this.category,
                 color: this.color,
                 onwerUid: this.authUser.uid
             })
             this.dialog = false;
+        }
+    },
+    filters: {
+        filterInitials: (ev) => {
+            let length = ev.length;
+            let pos = ev.indexOf('&');
+            return ev.slice(0, pos);
         }
     }
 }

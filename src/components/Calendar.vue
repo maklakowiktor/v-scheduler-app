@@ -132,7 +132,7 @@ export default {
         color: '#1976D2',
         category: null,
         geo: null,
-        duration: null,
+        duration: 0,
         currentlyEditing: null,
         selectedEvent: {},
         selectedElement: null,
@@ -262,7 +262,7 @@ export default {
           this.start = '';
           this.category = '';
           this.geo = '';
-          this.duration= '';
+          this.duration= 0;
           this.color = '#1976D2';
         } else {
           this.alertErr();
