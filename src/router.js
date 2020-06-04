@@ -58,9 +58,6 @@ const router = new VueRouter({
 })
 
 function authGuard(from, to, next) {
-  if (from.name === 'Calendar') Store.dispatch('setCategories');
-
-  Store.dispatch('setCategories');
   if (Store.getters.isUserAuthenticated)
     next();
   else

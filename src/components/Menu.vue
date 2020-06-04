@@ -82,9 +82,6 @@
                                                 {{ tag.category }}
                                             </v-chip>
                                         </v-chip-group>
-                                        <v-btn class="mr-3" color="primary" dark height="30" outlined rounded @click="dialog = true">
-                                            <v-icon>mdi-plus</v-icon>
-                                        </v-btn>
                                         <v-btn color="primary" dark height="30" outlined rounded @click="resetFilters" :disabled="filtered">
                                             <v-icon>mdi-undo</v-icon>
                                         </v-btn>
@@ -161,18 +158,8 @@
             </v-card>
         </v-dialog>
 
-        <v-snackbar
-            v-model="snackbar"
-            timeout="4000"
-        >
-            {{ text }}
-            <v-btn
-                color="blue"
-                text
-                @click="snackbar = false"
-            >
-                Close
-            </v-btn>
+        <v-snackbar v-model="snackbar" timeout="4000">{{ snacktext }}
+            <v-btn color="blue" text @click="snackbar = false">Закрыть</v-btn>
         </v-snackbar>
     </v-row>
 </template>
@@ -205,32 +192,35 @@ export default {
         message: false,
         hints: true,
         dialog: false,
-        filtered: true,
         category: null,
         color: '#0e1cff',
         fieldRule: [
             (v) => !!v || 'Заполните поле'
         ],
         snackbar: false,
+        snacktext: '',
     }),
     created() {
         eventBus.$on('eTitle', (val) => {
             return this.title = val;
         })
-        if(this.$store.getters.isUserAuthenticated === true) this.$store.dispatch('uploadEvents');
 
-        if (window.Notification && Notification.permission !== "granted") {
+        if (!window.Notification) {
+            this.snackerNotifications('Ваш браузер не поддерживает уведомления');
+        } else if(Notification.permission === "default") {
             Notification.requestPermission((status) => {
-                console.log('Статус уведомлений: ', status);
+                if (status === 'granted') {
+                    this.snackerNotifications('Уведомления включены');
+                } else if(status === 'denied') {
+                    this.snackerNotifications('Уведомления отключены');
+                }
+                
             })
-        } else if(!window.Notification) {
-            console.log('Ваш браузер не поддерживает уведомления');
+        } else if(Notification.permission === 'denied') {
+           this.snackerNotifications('Уведомления отключены');
         } else {
-            console.log('Уведомления включены', window.Notification.permission);
+            this.snackerNotifications('Уведомления включены');
         }
-    },
-    mounted() {
-        this.$store.dispatch('setCategories');  
     },
     computed: {
         categories() {
@@ -246,14 +236,11 @@ export default {
             return this.$store.getters.authUser;
         },
     },
-    watch: {
-        isUserAuthenticated(val) {
-            if ( val !== true ) {
-                this.$router.push("/auth");
-            }
-        },
-    },
     methods: {
+        snackerNotifications(status) {
+            this.snacktext = status;
+            this.snackbar = true;
+        },
         setToday: function() {
         	eventBus.$emit('eSetToday');
         },
@@ -272,20 +259,8 @@ export default {
         },
         filterEvents(category) {
             this.$store.dispatch('SORT_EVENTS', category);
-            this.filtered = false; // TODO: Не работает
+            this.filtered = false;
         },
-        resetFilters() {
-            this.$store.commit('RESET_EVENTS');
-            this.filtered = true;
-        },
-        async addCategory() {
-            await db.collection('categories').add({ // TODO: Add snapshot realtime on categories vuex
-                category: this.category,
-                color: this.color,
-                onwerUid: this.authUser.uid
-            })
-            this.dialog = false;
-        }
     },
     filters: {
         filterInitials: (ev) => {

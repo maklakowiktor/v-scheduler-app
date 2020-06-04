@@ -22,5 +22,15 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
+    ::-webkit-scrollbar {
+        width: 6px;
+        background-color: rgb(255, 255, 255)
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background-color: rgb(230, 230, 230);
+        border-radius: 5px;
+        border: 1px solid lightgray;
+    }
 </style>

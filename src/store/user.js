@@ -71,7 +71,6 @@ export default {
             if(payload) {
                 commit('SET_USER', payload);
                 commit('SET_USER_NAME', payload.displayName);
-                console.log(payload.displayName);
             } else {
                 commit('UNSET_USER');
             }
@@ -80,6 +79,6 @@ export default {
     getters: {
         isUserAuthenticated: (state) => state.user.isAuthenticated,
         getEmail: (state) => state.user.email,
-        authUser: state => state.user, // TODO: Keep
+        authUser: state => state.user,
     }
 }

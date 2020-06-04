@@ -8,6 +8,7 @@ export default {
         categories: [],
         processing: false,
         error: null,
+        key: null
     },
     mutations: {
         SET_PROCESSING(state, payload) {
@@ -34,6 +35,9 @@ export default {
         },
         RESET_EVENTS: (state) => {
             state.events = state.initEvents; 
+        },
+        SET_SECRET_KEY: (state, key) => {
+            state.key = key;
         }
     },
     actions: {
@@ -47,7 +51,7 @@ export default {
             });
             context.commit('SET_EVENTS', events);
         },
-        setTodos: async (context, uid) => {
+        setTodos: async ({ commit }, uid) => {
             let snapshot = await db.collection('todos').where('ownerUid', '==', uid).get(); // .where('ownerUid', '==', '')
             const todos = [];
             snapshot.forEach(doc => {
@@ -55,17 +59,17 @@ export default {
                 appData.id = doc.id
                 todos.push(appData)
             });
-            context.commit('SET_TODOS', todos);
+            commit('SET_TODOS', todos);
         },
-        setCategories: async (context) => {
-            let snapshot = await db.collection('categories').get();
+        setCategories: async ({ commit }, uid) => {
+            let snapshot = await db.collection('categories').where('ownerUid', '==', uid).get();
             const categories = [];
             snapshot.forEach(doc => {
                 let appData = doc.data()
                 appData.id = doc.id
                 categories.push(appData)
             });
-            context.commit('SET_CATEGORIES', categories);
+            commit('SET_CATEGORIES', categories);
         },
         SORT_EVENTS: ({state, commit}, category) => {
             commit('RESET_EVENTS');
@@ -74,9 +78,23 @@ export default {
             const filteredEvents = initEvents.filter(event => event.category === category);
             
             commit('FILTER_EVENTS', filteredEvents);
+        },
+        FETCH_SECRET_KEY: ({commit}) => {
+            const docRef = db.collection("secretKey").doc("secretKey");
+
+            docRef.get().then(function(doc) {
+                if (doc.exists) {
+                    commit('SET_SECRET_KEY', doc.data().key);
+                } else {
+                    console.log("Ошибка БД. Отсутствует секретный ключ!");
+                }
+            }).catch(function(error) {
+                console.log("Ошибка при получении ключа: ", error);
+            });
         }
     },
     getters: {
+        getSecretKey: state => state.key, 
         getProcessing: state => state.processing,
         getError: state => state.error,
         getEvents: state => state.events,
