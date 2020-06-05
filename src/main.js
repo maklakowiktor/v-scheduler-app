@@ -11,21 +11,14 @@ import firebaseConfig from './config/firebase';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
+import Vue2TouchEvents from 'vue2-touch-events';
 
 Vue.use(VueTextareaAutosize);
 Vue.use(DatetimePicker);
 Vue.use(VuePageTransition);
+Vue.use(Vue2TouchEvents);
 Vue.config.productionTip = false;
-
-const ignoreWarnMessage = 'The .native modifier for v-on is only valid on components but it was used on <div>.';
-Vue.config.warnHandler = function (msg, vm, trace) {
-  // `trace` is the component hierarchy trace
-  if (msg === ignoreWarnMessage) {
-    msg = null;
-    vm = null;
-    trace = null;
-  }
-}
+ 
 
 firebase.initializeApp(firebaseConfig);
 

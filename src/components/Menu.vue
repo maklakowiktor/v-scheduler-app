@@ -133,32 +133,9 @@
 
             </v-sheet>
         </v-col>
-        <v-dialog v-model="dialog" persistent max-width="400px">
-            <v-card>
-                <v-card-title>
-                    <span class="headline">Добавить категорию</span>
-                </v-card-title>
-                <v-card-text>
-                    <v-container>
-                        <v-row>
-                            <v-col cols="12" sm="6" md="12">
-                                <v-text-field v-model="category" label="Название" required :rules="fieldRule"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" md="12">
-                                <v-text-field type="color" v-model="color" label="Цвет" required :rules="fieldRule"></v-text-field>
-                            </v-col>
-                        </v-row>
-                    </v-container>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="dialog = false; category = null">Закрыть</v-btn>
-                    <v-btn color="blue darken-1" text @click="addCategory" :disabled="!(category && color)">Сохранить</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
 
-        <v-snackbar v-model="snackbar" timeout="4000">{{ snacktext }}
+        <v-snackbar v-model="snackbar" :timeout="timeout">
+            {{ snacktext }}
             <v-btn color="blue" text @click="snackbar = false">Закрыть</v-btn>
         </v-snackbar>
     </v-row>
@@ -191,7 +168,6 @@ export default {
         menu: false,
         message: false,
         hints: true,
-        dialog: false,
         category: null,
         color: '#0e1cff',
         fieldRule: [
@@ -199,6 +175,8 @@ export default {
         ],
         snackbar: false,
         snacktext: '',
+        filtered: true,
+        timeout: 4000
     }),
     created() {
         eventBus.$on('eTitle', (val) => {
@@ -259,6 +237,10 @@ export default {
         },
         filterEvents(category) {
             this.$store.dispatch('SORT_EVENTS', category);
+            this.filtered = false;
+        },
+        resetFilters() {
+            this.$store.dispatch('RESET_EVENTS');
             this.filtered = false;
         },
     },

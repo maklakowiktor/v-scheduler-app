@@ -24,7 +24,6 @@
                 clearText="" 
                 label="Начало *" 
                 v-model="start" 
-                @input="outputDate"
                 :datePickerProps="{ scrollable: true }" 
                 :timePickerProps="{ format: '24hr', scrollable: true }" 
                 required>
@@ -38,17 +37,19 @@
                 clearText="" 
                 label="Окончание *" 
                 v-model="end" 
-                @input="outputDate"
                 :datePickerProps="{ scrollable: true }" 
                 :timePickerProps="{ format: '24hr', scrollable: true }" 
                 required>
               </v-datetime-picker>
               
               <v-select
-                v-model="category"
+                item-text="category"
+                item-value="category"
                 :items="categories"
+                v-model="category.category"
                 label="Категория *"
                 required
+                @input="showMe"
               ></v-select>
               
               <v-text-field v-model="geo" type="text" label="Местоположение (каб., организация)"></v-text-field>
@@ -60,7 +61,6 @@
                 v-model="duration"
                 label="Надпомнить через"
                 required
-                @input="outputDuration"
               ></v-select>
               
               <v-text-field
@@ -100,19 +100,13 @@
           @click:more="viewDay"
           @click:date="viewDay"
           @change="updateRange"
-
-          v-touch="{
-            left: () => show('Left'),
-            right: () => show('Right'),
-            up: () => show('Up slide'),
-            down: () => show('Down slide')
-          }"
-          
+          v-touch:swipe.left="swipeLeftHandler"
+          v-touch:swipe.right="swipeRightHandler"
         ></v-calendar>
         <v-menu v-model="selectedOpen" :close-on-content-click="false" :activator="selectedElement" offset-x>
           <v-card color="grey lighten-4" min-width="350px" flat>
             <v-toolbar :color="selectedEvent.color" dark>
-              <v-btn @click="deleteEvent(selectedEvent.id)" icon>
+              <v-btn @click="deleteEvent(selectedEvent.id, selectedEvent.private)" icon>
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
               <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
@@ -143,7 +137,7 @@
               <v-btn text color="secondary" @click="selectedOpen = false">Закрыть</v-btn>
               <v-btn text v-if="currentlyEditing !== selectedEvent.id" 
               @click.prevent="editEvent(selectedEvent)">Изменить</v-btn>
-              <v-btn text v-else @click.prevent="updateEvent(selectedEvent)">Сохранить</v-btn>
+              <v-btn text v-else @click.prevent="updateEvent(selectedEvent, selectedEvent.private)">Сохранить</v-btn>
             </v-card-actions>
           </v-card>
         </v-menu>
@@ -153,7 +147,7 @@
         <v-icon dark>mdi-plus</v-icon>
       </v-btn>
     </v-col>
-    <v-snackbar v-model="snackbar" timeout="4000">{{ snacktext }}
+    <v-snackbar v-model="snackbar" :timeout="4000">{{ snacktext }}
           <v-btn color="blue" text @click="snackbar = false">Закрыть</v-btn>
     </v-snackbar>
   </v-row>
@@ -181,13 +175,16 @@ export default {
         start: null,
         end:  null,
         color: '#1976D2',
-        category: null,
         geo: null,
+        dbs: ['calEvent', 'publicEvents'],
+        category: {
+          category: 'Общие',
+        },
         duration: {
-          name: '0 мин.',
           value: 0,
         },
         periods: [
+          { name: 'Не надпоминать', value: 0},
           { name: '1 мин.', value: 1},
           { name: '5 мин.', value: 5},
           { name: '10 мин.', value: 10},
@@ -220,9 +217,9 @@ export default {
         menu2: false,
         swipeDirection: 'None',
         snackbar: false,
-        snackText: ''
+        snacktext: ''
     }),
-    created() {
+    mounted() {
       eventBus.$on('eSetToday', () => {
         this.setToday();
       }),
@@ -235,12 +232,11 @@ export default {
       eventBus.$on('eType', (type) => {
         this.type = type;
       })
-    },
-    mounted() {
+      
       this.getEvents();
 
       if (this.isUserAuthenticated === true) {
-            this.$store.dispatch('setCategories', this.authUser.uid); 
+        this.$store.dispatch('setCategories', this.authUser.uid); 
       }
     },
     computed: {
@@ -249,6 +245,10 @@ export default {
         this.$store.getters.getCategories.map( cat => {
           filterCats.push(cat.category);
         });
+        filterCats.unshift({
+          category: 'Общие',
+          color: "#1976D2FF",
+        })
         return filterCats;
       },
       events() {
@@ -309,17 +309,18 @@ export default {
       }
     },
     methods: {
+      swipeRightHandler() {
+        this.next();
+      },
+      swipeLeftHandler() {
+        this.prev();
+      },
+      showMe () {
+        console.log(this.start, this.end);
+      },
       swipe (direction) {
         this.snacktext = status;
         this.snackbar = true;
-      },
-      outputDuration() {
-        console.log('Duration: ', this.duration);
-      },
-      outputDate() {
-        this.start = moment(new Date(this.start)).format('YYYY-MM-DDTHH:mm');
-        this.end = moment(new Date(this.end)).format('YYYY-MM-DDTHH:mm');
-        console.log("Start: ", this.start, "End: ", this.end);
       },
       alertErr() {
         this.errShow = true;
@@ -328,41 +329,75 @@ export default {
         }, 3000)
       },
       getEvents () {
-        this.$store.dispatch('setEvents');
+        this.$store.dispatch('setEvents', this.authUser.uid);
       },
       openDialog() {
         this.dialog = true;
         this.end = this.start = new Date();
       },
-      async addEvent() {
-        if(this.name && this.start && this.end) {
-          await db.collection('calEvent').add({
-            name: this.name,
-            details: this.details,
-            start: this.start,
-            end: this.end,
-            color: this.color,
-            category: this.category,
-            geo: this.geo,
-            duration: parseInt(this.duration.value),
-            ownerUid: this.authUser.uid
-          })
-          this.getEvents();
-          this.name = '';
-          this.details = '';
-          this.end = '';
-          this.start = '';
-          this.category = '';
-          this.geo = '';
-          this.duration = this.periods;
-          this.color = '#1976D2';
+      resetForm() {
+        this.getEvents();
+        this.name = '';
+        this.details = '';
+        this.end = '';
+        this.start = '';
+        this.category = {
+          category: 'Общие',
+        },
+        this.geo = '';
+        this.duration = {
+          value: 0,
+        },
+        this.color = '#1976D2';
+      },
+      addEvent() {
+        if (this.name && this.start && this.end && this.category.category === 'Общие') {
+
+          console.log('Добавление общего события');
+          this.query('publicEvents');
+
+        } else if (this.name && this.start && this.end && this.category.category !== 'Общие') {
+          
+          console.log(`Добавление личного (${this.category.category}) события`);
+          this.query('calEvent');
+
         } else {
           this.alertErr();
         }
       },
-      async updateEvent(ev) {
+      async query(param) {
+        let privateEvent = null;
+
+        if (param === 'publicEvents') {
+          privateEvent = false;
+        } else {
+          privateEvent = true;
+        }
+        
+        await db.collection(param).add({
+            name: this.name,
+            details: this.details,
+            start: new Date(this.start).toISOString().substring(0, 16),
+            end: new Date(this.end).toISOString().substring(0, 16),
+            color: this.color,
+            category: this.category.category,
+            geo: this.geo,
+            duration: parseInt(this.duration.value),
+            ownerUid: this.authUser.uid,
+            private: privateEvent
+          })
+
+          this.resetForm;
+      },
+      async updateEvent(ev, privateEvent) {
+        let db = null;
+        if (privateEvent === true) {
+          db = this.dbs[0];
+        } else {
+          db = this.dbs[1];
+        }
         await db
-          .collection('calEvent')
+          .collection(db)
           .doc(this.currentlyEditing)
           .update({
             details: ev.details
@@ -370,9 +405,15 @@ export default {
           this.selectedOpen = false;
           this.currentlyEditing = null;
       },
-      async deleteEvent(ev) {
+      async deleteEvent(ev, privateEvent) {
+        let db = null;
+        if (privateEvent === true) {
+          db = this.dbs[0];
+        } else {
+          db = this.dbs[1];
+        }
         await db
-          .collection('calEvent')
+          .collection(db)
           .doc(ev)
           .delete();
         
@@ -434,6 +475,7 @@ export default {
       }
     }
 };
+
 </script>
 
 <style scoped>

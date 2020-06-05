@@ -72,6 +72,7 @@ export default {
       position: null,
       show1: false,
       valid: false,
+      secretkey: null,
       repeatPassword: null,
       emailRules: [
         v => !!v || 'Введите E-mail',

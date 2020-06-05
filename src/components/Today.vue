@@ -7,7 +7,9 @@
                 <v-col v-if="!events.length">
                   <p>Нет запланированных встреч на сегодня</p>
                 </v-col>
-                <v-col v-else > 
+                <v-col 
+                    v-else 
+                  > 
                   <v-card-text v-for="(event, i) in events" :key="i" class="py-0" >
                     <v-timeline
                       align-top
@@ -64,7 +66,10 @@ export default {
     },
     isUserAuthenticated() {
       return this.$store.getters.isUserAuthenticated;
-    }
+    },
+    authUser() {
+      return this.$store.getters.authUser;
+    },
   },
   watch: {
     isUserAuthenticated(val) {
@@ -77,7 +82,7 @@ export default {
       this.$store.dispatch('SIGNOUT'); 
     },
     getEvents() {
-      this.$store.dispatch('setEvents');
+      this.$store.dispatch('setEvents', this.authUser.uid);
     }
   },
   filters: {

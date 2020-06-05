@@ -23,6 +23,8 @@ export default {
 </script>
 
 <style>
+  
+
     ::-webkit-scrollbar {
         width: 6px;
         background-color: rgb(255, 255, 255)

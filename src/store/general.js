@@ -41,15 +41,27 @@ export default {
         }
     },
     actions: {
-        setEvents: async context => {
-            let snapshot = await db.collection('calEvent').get(); // .where('ownerUid', '==', '')
+        setEvents: async ({commit}, uid) => {
+            let privateEvents = await db.collection('calEvent').where('ownerUid', '==', uid).where('private', '==', true).get();
+            let publicEvents = await db.collection('publicEvents').get();
             const events = [];
-            snapshot.forEach(doc => {
-                let appData = doc.data()
-                appData.id = doc.id
-                events.push(appData)
-            });
-            context.commit('SET_EVENTS', events);
+
+            commitEvents(privateEvents);
+            commitEvents(publicEvents);
+            
+            console.log("general.js 54 line: ", events);
+
+            commit('SET_EVENTS', events);
+
+            function commitEvents(arr) {
+                let evs = arr;
+
+                evs.forEach(doc => {
+                    let appData = doc.data();
+                    appData.id = doc.id;
+                    events.push(appData);
+                });
+            }
         },
         setTodos: async ({ commit }, uid) => {
             let snapshot = await db.collection('todos').where('ownerUid', '==', uid).get(); // .where('ownerUid', '==', '')

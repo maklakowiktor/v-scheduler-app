@@ -1,6 +1,10 @@
 <template>
     <v-container fluid>
-        <v-layout row wrap align-center>
+        <v-layout 
+            row 
+            wrap 
+            align-center
+        >
             <v-row justify="center" >
                 <v-card min-width="450px" max-width="40%" class="ma-5" >
                     <v-col class="shrink">
@@ -40,9 +44,29 @@
                                 <v-card-title class="headline">Изменить пароль</v-card-title>
 
                                 <v-card-text>
-                                        <v-text-field id="password" label="Пароль" name="password" prepend-icon="lock" v-model="password" :rules="passwordRules" :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" :type="show1 ? 'text' : 'password'" @click:append="show1 = !show1" required
+                                        <v-text-field 
+                                            id="password" 
+                                            label="Пароль" 
+                                            name="password" 
+                                            prepend-icon="lock" 
+                                            v-model="password" 
+                                            :rules="passwordRules" 
+                                            :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" 
+                                            :type="show1 ? 'text' : 'password'" 
+                                            @click:append="show1 = !show1" 
+                                            required
                                     ></v-text-field>
-                                        <v-text-field id="repeatpassword" label="Повторите пароль" name="repeat-password" prepend-icon="repeat" v-model="repeatPassword" :rules="repeatPasswordRules" :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" :type="show1 ? 'text' : 'password'" @click:append="show1 = !show1" required
+                                        <v-text-field 
+                                            id="repeatpassword" 
+                                            label="Повторите пароль" 
+                                            name="repeat-password" 
+                                            prepend-icon="repeat" 
+                                            v-model="repeatPassword" 
+                                            :rules="repeatPasswordRules" 
+                                            :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" 
+                                            :type="show1 ? 'text' : 'password'" 
+                                            @click:append="show1 = !show1" 
+                                            required
                                     ></v-text-field>
                                 </v-card-text>
 
@@ -180,8 +204,19 @@ export default {
         color: '#1976D2FF',
 		mask: '!#XXXXXXXX',
         menu: false,
+        show1: false,
+        password: null,
+        repeatPassword: null,
         maxLength: [
             (v) => v.length < 15 || 'До 15 символов'
+        ],
+        passwordRules: [
+            v => !!v || 'Введите пароль',
+            v => (v && v.length >= 6) || 'Пароль слишком короткий - минимум 6 символов'
+        ],
+        repeatPasswordRules: [
+            v => !!v || 'Повторите пароль',
+            v => (v === this.password) || 'Пароли не совпадают'
         ],
     }),
     created() {
@@ -229,7 +264,16 @@ export default {
             } else {
                 return true;
             }
-        }
+        },
+        isUserAuthenticated() {
+            return this.$store.getters.isUserAuthenticated;
+        },
+    },
+    watch: {
+        isUserAuthenticated(val) {
+            if (val !== true)
+                this.$router.push("/auth");
+        },
     },
     methods: {
         openAvatarPicker () {
