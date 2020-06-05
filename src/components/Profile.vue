@@ -6,7 +6,7 @@
             align-center
         >
             <v-row justify="center" >
-                <v-card min-width="450px" max-width="40%" class="ma-5" >
+                <v-card class="ma-5" min-width="45%">
                     <v-col class="shrink">
                         <v-card-text>
                             <v-row justify="center" align="center">
@@ -44,6 +44,7 @@
                                 <v-card-title class="headline">Изменить пароль</v-card-title>
 
                                 <v-card-text>
+                                    <v-form v-model="validPass">
                                         <v-text-field 
                                             id="password" 
                                             label="Пароль" 
@@ -53,9 +54,10 @@
                                             :rules="passwordRules" 
                                             :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" 
                                             :type="show1 ? 'text' : 'password'" 
-                                            @click:append="show1 = !show1" 
+                                            @click:append="show1 = !show1"
+                                            :disabled="!valid"
                                             required
-                                    ></v-text-field>
+                                        ></v-text-field>
                                         <v-text-field 
                                             id="repeatpassword" 
                                             label="Повторите пароль" 
@@ -65,9 +67,11 @@
                                             :rules="repeatPasswordRules" 
                                             :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" 
                                             :type="show1 ? 'text' : 'password'" 
-                                            @click:append="show1 = !show1" 
+                                            @click:append="show1 = !show1"
+                                            :disabled="!valid"
                                             required
-                                    ></v-text-field>
+                                        ></v-text-field>
+                                    </v-form>
                                 </v-card-text>
 
                                 <v-card-actions>
@@ -76,7 +80,7 @@
                                 <v-btn
                                     color="green darken-1"
                                     text
-                                    @click="dialog = false"
+                                    @click="cancelPass"
                                 >
                                     Отмена
                                 </v-btn>
@@ -85,7 +89,7 @@
                                     color="green darken-1"
                                     text
                                     @click="dialog = false"
-                                    :disabled="valid"
+                                    :disabled="!validPass"
                                 >
                                     Сохранить
                                 </v-btn>
@@ -95,7 +99,7 @@
                         </v-card-actions>
                     </v-col>
                 </v-card>
-                <v-card class="ma-5 scroll" min-width="450px" max-width="40%" max-height="500px">
+                <v-card class="ma-5 scroll" min-width="45%" max-height="500px">
                     <v-card-text>
                         <v-card-title class="headline">
                             Категории
@@ -167,14 +171,14 @@
                             <v-chip  :color="item.color">{{ item.color }}</v-chip>
                         </v-list-item-content>
             
-                        <v-list-item-action>
+                        <!-- <v-list-item-action>
                             <v-btn icon>
                                 <v-icon color="grey lighten-1">mdi-pencil</v-icon>
                             </v-btn>
-                        </v-list-item-action>
+                        </v-list-item-action> -->
 
                         <v-list-item-action>
-                            <v-btn icon>
+                            <v-btn icon @click="deleteCategory(item.id)">
                                 <v-icon color="grey lighten-1">mdi-delete</v-icon>
                             </v-btn>
                         </v-list-item-action>
@@ -190,35 +194,38 @@ import { db } from '@/main.js';
 
 export default {
     name: 'Profile',
-    data: () => ({
-        loading: false,
-        form: {
-            position: '',
-            initials: '',
-            email: ''
-        },
-        showAvatarPicker: false,
-        category: '',
-        dialog: false,
-        dialog2: false,
-        color: '#1976D2FF',
-		mask: '!#XXXXXXXX',
-        menu: false,
-        show1: false,
-        password: null,
-        repeatPassword: null,
-        maxLength: [
-            (v) => v.length < 15 || 'До 15 символов'
-        ],
-        passwordRules: [
-            v => !!v || 'Введите пароль',
-            v => (v && v.length >= 6) || 'Пароль слишком короткий - минимум 6 символов'
-        ],
-        repeatPasswordRules: [
-            v => !!v || 'Повторите пароль',
-            v => (v === this.password) || 'Пароли не совпадают'
-        ],
-    }),
+    data() {
+        return {
+            loading: false,
+            form: {
+                position: '',
+                initials: '',
+                email: ''
+            },
+            showAvatarPicker: false,
+            category: '',
+            dialog: false,
+            dialog2: false,
+            color: '#1976D2FF',
+            mask: '!#XXXXXXXX',
+            menu: false,
+            validPass: false,
+            show1: false,
+            password: null,
+            repeatPassword: null,
+            maxLength: [
+                (v) => v.length < 15 || 'До 15 символов'
+            ],
+            passwordRules: [
+                v => !!v || 'Введите пароль',
+                v => (v && v.length >= 6) || 'Пароль слишком короткий - минимум 6 символов'
+            ],
+            repeatPasswordRules: [
+                v => !!v || 'Повторите пароль',
+                v => (v === this.password) || 'Пароли не совпадают'
+            ],
+        }
+    },
     created() {
         let auth = this.$store.getters.authUser;
         let pos = auth.initials.indexOf('&');
@@ -232,12 +239,12 @@ export default {
         this.form = user;
     },
     mounted() {
-
-        if (this.isUserAuthenticated === true) {
-            this.$store.dispatch('setCategories', this.authUser.uid); 
-        }
+        this.queryCategories;
     },
     computed: {
+        comparedPassword() {
+            return this.password;
+        },
         isUserAuthenticated() {
             return this.$store.getters.isUserAuthenticated;
         },
@@ -276,6 +283,22 @@ export default {
         },
     },
     methods: {
+        async deleteCategory(id) {
+            await db
+                .collection('categories')
+                .doc(id)
+                .delete();
+            
+            this.queryCategories();
+        },
+        queryCategories() {
+            this.$store.dispatch('setCategories', this.authUser.uid); 
+        },
+        cancelPass() {
+            this.password = '';
+            this.repeatPassword = '';
+            this.dialog = false;
+        },
         openAvatarPicker () {
             this.showAvatarPicker = true;
         },

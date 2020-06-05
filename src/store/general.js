@@ -49,8 +49,6 @@ export default {
             commitEvents(privateEvents);
             commitEvents(publicEvents);
             
-            console.log("general.js 54 line: ", events);
-
             commit('SET_EVENTS', events);
 
             function commitEvents(arr) {

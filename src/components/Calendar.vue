@@ -1,6 +1,6 @@
 <template>
   <v-row class="fill-height">
-    <v-col class="pt-0 pr-0 pb-0">
+    <v-col class="pt-0 pb-0">
       <!-- Предупреждение -->
       <v-slide-y-transition class="py-0">
         <v-alert type="error" v-show="errShow">
@@ -49,7 +49,6 @@
                 v-model="category.category"
                 label="Категория *"
                 required
-                @input="showMe"
               ></v-select>
               
               <v-text-field v-model="geo" type="text" label="Местоположение (каб., организация)"></v-text-field>
@@ -106,7 +105,7 @@
         <v-menu v-model="selectedOpen" :close-on-content-click="false" :activator="selectedElement" offset-x>
           <v-card color="grey lighten-4" min-width="350px" flat>
             <v-toolbar :color="selectedEvent.color" dark>
-              <v-btn @click="deleteEvent(selectedEvent.id, selectedEvent.private)" icon>
+              <v-btn v-if="selectedEvent.ownerUid === authUser.uid" @click="deleteEvent(selectedEvent.id, selectedEvent.private)" icon>
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
               <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
@@ -135,7 +134,7 @@
             </v-card-text>
             <v-card-actions>
               <v-btn text color="secondary" @click="selectedOpen = false">Закрыть</v-btn>
-              <v-btn text v-if="currentlyEditing !== selectedEvent.id" 
+              <v-btn text v-show="selectedEvent.ownerUid === authUser.uid" v-if="(currentlyEditing !== selectedEvent.id)" 
               @click.prevent="editEvent(selectedEvent)">Изменить</v-btn>
               <v-btn text v-else @click.prevent="updateEvent(selectedEvent, selectedEvent.private)">Сохранить</v-btn>
             </v-card-actions>
@@ -278,10 +277,6 @@ export default {
         const startDay = start.day + this.nth(start.day)
         const endDay = end.day + this.nth(end.day)
 
-        // console.log(start, end);
-        // this.end = this.start = new Date().toJSON().slice(0, 10).toString() + 'T12:00';
-        // console.log(startMonth, endMonth, suffixMonth, startYear, endYear, startDay, endDay);
-
         switch (this.type) {
           case 'month':
             return `${startMonth} ${startYear}`
@@ -315,9 +310,6 @@ export default {
       swipeLeftHandler() {
         this.prev();
       },
-      showMe () {
-        console.log(this.start, this.end);
-      },
       swipe (direction) {
         this.snacktext = status;
         this.snackbar = true;
@@ -336,7 +328,6 @@ export default {
         this.end = this.start = new Date();
       },
       resetForm() {
-        this.getEvents();
         this.name = '';
         this.details = '';
         this.end = '';
@@ -349,16 +340,16 @@ export default {
           value: 0,
         },
         this.color = '#1976D2';
+        this.getEvents();
+
       },
       addEvent() {
         if (this.name && this.start && this.end && this.category.category === 'Общие') {
 
-          console.log('Добавление общего события');
           this.query('publicEvents');
 
         } else if (this.name && this.start && this.end && this.category.category !== 'Общие') {
           
-          console.log(`Добавление личного (${this.category.category}) события`);
           this.query('calEvent');
 
         } else {
@@ -375,29 +366,28 @@ export default {
         }
         
         await db.collection(param).add({
-            name: this.name,
-            details: this.details,
-            start: new Date(this.start).toISOString().substring(0, 16),
-            end: new Date(this.end).toISOString().substring(0, 16),
-            color: this.color,
-            category: this.category.category,
-            geo: this.geo,
-            duration: parseInt(this.duration.value),
-            ownerUid: this.authUser.uid,
-            private: privateEvent
-          })
-
-          this.resetForm;
+          name: this.name,
+          details: this.details,
+          start: new Date(this.start).toISOString().substring(0, 16),
+          end: new Date(this.end).toISOString().substring(0, 16),
+          color: this.color,
+          category: this.category.category,
+          geo: this.geo,
+          duration: parseInt(this.duration.value),
+          ownerUid: this.authUser.uid,
+          private: privateEvent
+        })
+        this.resetForm();
       },
       async updateEvent(ev, privateEvent) {
-        let db = null;
+        let dbname = null;
         if (privateEvent === true) {
-          db = this.dbs[0];
+          dbname = this.dbs[0];
         } else {
-          db = this.dbs[1];
+          dbname = this.dbs[1];
         }
         await db
-          .collection(db)
+          .collection(dbname)
           .doc(this.currentlyEditing)
           .update({
             details: ev.details
@@ -406,14 +396,14 @@ export default {
           this.currentlyEditing = null;
       },
       async deleteEvent(ev, privateEvent) {
-        let db = null;
+        let dbname = null;
         if (privateEvent === true) {
-          db = this.dbs[0];
+          dbname = this.dbs[0];
         } else {
-          db = this.dbs[1];
+          dbname = this.dbs[1];
         }
         await db
-          .collection(db)
+          .collection(dbname)
           .doc(ev)
           .delete();
         

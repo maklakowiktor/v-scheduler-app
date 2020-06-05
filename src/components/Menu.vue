@@ -202,7 +202,20 @@ export default {
     },
     computed: {
         categories() {
-            return this.$store.getters.getCategories;
+            let filterCats = [];
+            
+            this.$store.getters.getCategories.map( cat => {
+                filterCats.push(cat);
+            });
+            
+            filterCats.unshift({
+                category: 'Общие',
+                color: "#1976D2FF",
+                id: '0',
+                ownerUid: '0'
+            });
+            
+            return filterCats;
         },
         currentRoute() {
             return this.$route.name;
@@ -240,7 +253,7 @@ export default {
             this.filtered = false;
         },
         resetFilters() {
-            this.$store.dispatch('RESET_EVENTS');
+            this.$store.commit('RESET_EVENTS');
             this.filtered = false;
         },
     },
