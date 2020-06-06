@@ -34,6 +34,10 @@ new Vue({
     const vm = this;
     firebase.auth().onAuthStateChanged(function(user) {
       vm.$store.dispatch('STATE_CHANGED', user);
+
+      if (vm.$store.getters.isUserAuthenticated) {
+        vm.$store.dispatch('uploadEvents', vm.$store.getters.authUser.uid);
+      }
     });
   },
   render: h => h(App)

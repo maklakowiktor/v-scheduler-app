@@ -1,6 +1,6 @@
 <template>
   <v-app>
-      <v-content>
+      <v-content class="v-con-bg">
         <Menu />
         <vue-page-transition name="fade-in-right">
           <router-view></router-view>
@@ -23,7 +23,9 @@ export default {
 </script>
 
 <style>
-  
+  .v-con-bg {
+    background: #f3f3f3;
+  }
 
     ::-webkit-scrollbar {
         width: 6px;

@@ -1,4 +1,5 @@
 import firebase from 'firebase';
+import { eventBus } from "@/main.js";
 
 export default {
     state: {
@@ -36,7 +37,6 @@ export default {
             firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password)
                 .then(() => {
                     inits = payload.surname.charAt(0).toUpperCase() + payload.surname.slice(1) + " " + payload.name[0].toUpperCase() + "." + payload.patronymic[0].toUpperCase() + "." + " &" + payload.position;
-                    console.log(inits);
                     firebase.auth().currentUser.updateProfile({
                         displayName: inits,
                     })
@@ -74,6 +74,32 @@ export default {
             } else {
                 commit('UNSET_USER');
             }
+        },
+        CHANGE_USER_PASSWORD({state, commit}, payload) {
+            let user = firebase.auth().currentUser;
+            let credential = firebase.auth.EmailAuthProvider.credential(
+                state.user.email,
+                payload.password,
+            )
+            commit('SET_PROCESSING', true);
+            commit('CLEAR_ERROR');
+            
+            user.reauthenticateWithCredential(credential).then(function() {
+                let currentUser = firebase.auth().currentUser;
+
+                currentUser.updatePassword(payload.newPassword)
+                .then(() => {
+                    commit('SET_PROCESSING', false);
+                    eventBus.$emit('clearFormPassword');
+                })
+                .catch(error => {
+                    commit('SET_PROCESSING', false);
+                    commit('SET_ERROR', error.message);
+                })
+            }).catch(function(error) {
+                commit('SET_PROCESSING', false);
+                commit('SET_ERROR', error.message);
+            });
         }
     },
     getters: {

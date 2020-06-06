@@ -6,8 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "start": "node server.js",
-    "pack": "npm run build && git add . && git commit -m 'Fixed bugs' && git push -u origin master && git push heroku master"
+    "start": "node server.js"
   },
   "dependencies": {
     "core-js": "^3.6.4",

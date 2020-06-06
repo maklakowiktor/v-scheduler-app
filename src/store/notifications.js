@@ -11,23 +11,26 @@ export default {
         }
     },
     actions: {
-        uploadEvents: ({commit, dispatch}) => {
+        uploadEvents: ({commit, dispatch}, uid) => {
             let notifs = [];
-
-            db.collection('calEvent').where('duration', '>', 0).onSnapshot(querySnapshot => {
+            
+            db.collection('calEvent').where('ownerUid', '==', uid).onSnapshot(querySnapshot => {
                 querySnapshot.docChanges().forEach(change => {
                     if (change.type === 'added') {
-                        console.log('New event - ', change.doc.data());
                         notifs.push(change.doc.data());
                         commit('SET_PLANNING', notifs); 
                         dispatch('eventIterator');
                         notifs = [];
                     }
-                    if (change.type === 'modified') {
-                        console.log('Modified event: ', change.doc.data());
-                    }
-                    if (change.type === 'removed') {
-                        console.log('Removed event: ', change.doc.data());
+                });
+            });
+            db.collection('publicEvents').onSnapshot(querySnapshot => {
+                querySnapshot.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        notifs.push(change.doc.data());
+                        commit('SET_PLANNING', notifs); 
+                        dispatch('eventIterator');
+                        notifs = [];
                     }
                 });
             });
@@ -36,20 +39,38 @@ export default {
             if (state.planning.length === 0) return;
             
             state.planning.forEach(event => {
-              dispatch('createEvent', event);
+                console.log(event.end);
+                const end = new Date(event.end).addHours(3);
+                const now = new Date();
+                const diff = (end - now);
+                console.log(end.toISOString(), now.toISOString(), diff);
+                if ( diff >= 0 ) {
+                    dispatch('createEvent', [event, diff]);
+                } else {
+                    return;
+                }
             });
         },
-        createEvent: ({}, ev) => {
+        createEvent: ({}, arr) => {
+            let ev = arr[0];
+            let ms = arr[1];
+            console.log(ev, ms);
+            
             setTimeout((ev) => {
                 Push.create(ev.name, {
                     body: ev.details,
-                    icon: require('../assets/calendar.png'),
+                    icon: require('../assets/bell.png'),
                     onClick: function () {
                         window.focus();
                         this.close();
                     }
                 });
-            }, ev.duration * 1000 * 60, ev );
+            }, ms, ev ); // ev.duration * 1000 * 60
         },
     }
+}
+
+Date.prototype.addHours = function(h) {
+    this.setTime(this.getTime() + ( h * 60 * 60 * 1000));
+    return this;
 }

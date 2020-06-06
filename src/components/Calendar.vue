@@ -51,7 +51,7 @@
                 required
               ></v-select>
               
-              <v-text-field v-model="geo" type="text" label="Местоположение (каб., организация)"></v-text-field>
+              <v-text-field v-model="geo" type="text" label="Местоположение (каб., организация)" ></v-text-field>
               
               <v-select
                 item-text="name"
@@ -59,6 +59,7 @@
                 :items="periods"
                 v-model="duration"
                 label="Надпомнить через"
+                @input="onput"
                 required
               ></v-select>
               
@@ -78,7 +79,7 @@
                 type="submit" 
                 color="primary" 
                 class="mr-4" 
-                @click.stop="dialog=false"
+                @click.stop="closeDialog"
               >Создать событие</v-btn>
             </v-form>
           </v-container>
@@ -99,8 +100,8 @@
           @click:more="viewDay"
           @click:date="viewDay"
           @change="updateRange"
-          v-touch:swipe.left="swipeLeftHandler"
-          v-touch:swipe.right="swipeRightHandler"
+          v-touch:swipe.left="swipeRightHandler"
+          v-touch:swipe.right="swipeLeftHandler"
         ></v-calendar>
         <v-menu v-model="selectedOpen" :close-on-content-click="false" :activator="selectedElement" offset-x>
           <v-card color="grey lighten-4" min-width="350px" flat>
@@ -113,11 +114,13 @@
               <v-chip outlined>{{ selectedEvent.category }}</v-chip>
             </v-toolbar>
             <v-card-text>
-                <span>
+                <span class="mr-2">
                   <v-icon>mdi-earth</v-icon>
                   {{ selectedEvent.geo }}
                 </span>
-                <v-divider ></v-divider>
+                |
+                <span class="ml-2">{{ selectedEvent.start | showFilteredTime }} - {{ selectedEvent.end | showFilteredTime }}</span>
+                <v-divider class="mt-2"></v-divider>
               <form v-if="currentlyEditing !== selectedEvent.id" class="mt-3">
                 {{ selectedEvent.details }}
               </form>
@@ -216,9 +219,24 @@ export default {
         menu2: false,
         swipeDirection: 'None',
         snackbar: false,
-        snacktext: ''
+        snacktext: '',
     }),
+    beforeDestroy() {
+      eventBus.$off('eSetToday');
+      eventBus.$off('ePrev');
+      eventBus.$off('eNext');
+      eventBus.$off('eType');
+    },
     mounted() {
+      db.collection('calEvent').where('ownerUid', '==', this.authUser.uid).onSnapshot(querySnapshot => {
+        this.getEvents();
+      });
+      db.collection('publicEvents').onSnapshot(querySnapshot => {
+        this.getEvents();
+      });
+
+      this.initData = [this.start, this.end];
+
       eventBus.$on('eSetToday', () => {
         this.setToday();
       }),
@@ -234,9 +252,8 @@ export default {
       
       this.getEvents();
 
-      if (this.isUserAuthenticated === true) {
-        this.$store.dispatch('setCategories', this.authUser.uid); 
-      }
+      this.$store.dispatch('setCategories', this.authUser.uid); 
+
     },
     computed: {
       categories() {
@@ -264,7 +281,6 @@ export default {
         if (!start || !end) {
           return '';
         }
-
         const startMonth = this.monthFormatter(start)
         const endMonth = this.monthFormatter(end)
 
@@ -303,7 +319,17 @@ export default {
         eventBus.$emit('eTitle', val)
       }
     },
+    filters: {
+      showFilteredTime: (val) => {
+        if (!val) return '';
+        let res = val.replace(/\T.*/, '');
+        return res.replace(/-/g, '.');
+      }
+    },
     methods: {
+      onput() {
+        console.log(this.duration);
+      },
       swipeRightHandler() {
         this.next();
       },
@@ -326,6 +352,9 @@ export default {
       openDialog() {
         this.dialog = true;
         this.end = this.start = new Date();
+      },
+      closeDialog() {
+        this.dialog = false; 
       },
       resetForm() {
         this.name = '';
@@ -373,11 +402,12 @@ export default {
           color: this.color,
           category: this.category.category,
           geo: this.geo,
-          duration: parseInt(this.duration.value),
+          duration: parseInt(this.duration),
           ownerUid: this.authUser.uid,
           private: privateEvent
         })
         this.resetForm();
+        // this.$store.dispatch('uploadEvents');
       },
       async updateEvent(ev, privateEvent) {
         let dbname = null;
@@ -417,13 +447,13 @@ export default {
       getEventColor (event) {
         return event.color
       },
-      setToday () {
+      setToday() {
         this.focus = this.today;
       },
-      prev () {
+      prev() {
         this.$refs.calendar.prev()
       },
-      next () {
+      next() {
         this.$refs.calendar.next()
       },
       editEvent(ev) {
@@ -446,7 +476,6 @@ export default {
         nativeEvent.stopPropagation()
       },
       updateRange ({ start, end }) {
-
         this.start = start
         this.end = end
       },
@@ -463,7 +492,7 @@ export default {
           ? `${a.getFullYear()}-${a.getMonth() + 1}-${a.getDate()} ${a.getHours()}:${a.getMinutes()}`
           : `${a.getFullYear()}-${a.getMonth() + 1}-${a.getDate()}`
       }
-    }
+    },
 };
 
 </script>

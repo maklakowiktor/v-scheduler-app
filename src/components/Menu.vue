@@ -11,8 +11,8 @@
                     <v-list-item-title>{{ authUser.initials | filterInitials }}</v-list-item-title>
                 </v-list-item-content>
             </v-list-item >
-            <v-divider class=""></v-divider>
-            <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link">
+            <v-divider></v-divider>
+            <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link" @click="selectedFilter = null; filtered = true; menu = false;">
                 <v-list-item-icon>
                     <v-icon v-text="item.icon"></v-icon>
                 </v-list-item-icon>
@@ -22,8 +22,8 @@
             </v-list-item>
         </v-list>
         <template v-slot:append>
-            <div class="pa-2">
-                <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated">
+            <div class="pa-2 border" justify="center" align="center">
+                <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated" outlined>
                     <v-icon>exit_to_app</v-icon>
                     Выйти
                 </v-btn>
@@ -55,8 +55,7 @@
                     <div class="text-center mr-5">
                         <v-menu
                             v-model="menu"
-                            :close-on-content-click="false"
-                            open-on-hover
+                            :close-on-content-click="true"
                         >
                             <template v-slot:activator="{ on }">
                                 <v-btn
@@ -66,16 +65,17 @@
                                     v-on="on"
                                 >
                                     <v-icon>mdi-filter-outline</v-icon>
+                                    {{ selectedFilter }}
                                 </v-btn>
                             </template>
 
                             <v-card max-height="70vh" max-width="30vw">
-                                <v-col cols="12" sm="6" md="4" lg="12">
+                                <!-- <v-col > -->
                                     <v-sheet elevation="0" class="pa-4" justify="end">
                                         <h3 class="mb-1">Фильтрация по категории:</h3>
                                         <v-chip-group
                                             column
-                                            active-class="primary--text"
+                                            active-class="white--text"
                                             justify="end"
                                         >
                                             <v-chip v-for="(tag, idx) in categories" :key="idx" :color="tag.color" @click="filterEvents(tag.category)">
@@ -86,7 +86,7 @@
                                             <v-icon>mdi-undo</v-icon>
                                         </v-btn>
                                     </v-sheet>
-                                </v-col>
+                                <!-- </v-col> -->
                             </v-card>
 
                         </v-menu>
@@ -176,8 +176,12 @@ export default {
         snackbar: false,
         snacktext: '',
         filtered: true,
-        timeout: 4000
+        timeout: 4000,
+        selectedFilter: null,
     }),
+    beforeDestroy() {
+      eventBus.$off('eTitle');
+    },
     created() {
         eventBus.$on('eTitle', (val) => {
             return this.title = val;
@@ -251,10 +255,12 @@ export default {
         filterEvents(category) {
             this.$store.dispatch('SORT_EVENTS', category);
             this.filtered = false;
+            this.selectedFilter = category;
         },
         resetFilters() {
             this.$store.commit('RESET_EVENTS');
-            this.filtered = false;
+            this.filtered = true;
+            this.selectedFilter = null;
         },
     },
     filters: {
@@ -268,5 +274,7 @@ export default {
 </script>
 
 <style scoped>
-    
+    .border {
+        border: 1px solid lightgrey;
+    }
 </style>

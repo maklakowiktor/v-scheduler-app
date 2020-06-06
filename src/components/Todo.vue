@@ -55,10 +55,12 @@
                   </v-list-item-action>
 
                   <v-spacer></v-spacer>
-
                   <v-scroll-x-transition>
                     <v-icon v-if="task.done" color="success">check</v-icon>
                   </v-scroll-x-transition>
+                  <v-btn class="ml-1" icon @click="deleteTask(task.id)">
+                    <v-icon color="grey lighten-1">mdi-delete</v-icon>
+                  </v-btn>
                 </v-list-item>
               </template>
             </v-slide-y-transition>
@@ -71,7 +73,6 @@
 
 <script>
 import { db } from "@/main";
-import {mapGetters} from 'vuex';
 
 export default {
   name: 'Todo',
@@ -92,7 +93,6 @@ export default {
     this.getTasks(this.$store.getters.authUser);
   },
   computed: {
-    // ...mapGetters('userModule', ['authUser']),
     authUser() {
       return this.$store.getters.authUser;
     },
@@ -123,6 +123,7 @@ export default {
       this.$store.dispatch('setTodos', this.authUser.uid);
     },
     async create() {
+      if (this.task === '') return;
       let task = this.task;
 
       this.tasks.push({
@@ -142,6 +143,10 @@ export default {
       await db.collection('todos').doc(id).update({
         done: done
       });
+    },
+    async deleteTask(id) {
+      await db.collection('todos').doc(id).delete();
+      this.$store.dispatch('setTodos', this.authUser.uid);
     },
     signOut() {
       this.$store.dispatch('SIGNOUT'); 
