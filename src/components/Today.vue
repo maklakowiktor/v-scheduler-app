@@ -1,5 +1,5 @@
 <template>
-  <v-row class="fill-height">
+  <v-row class="fill-height" v-touch:swipe.right="openSidebar">
     <v-col>
       <template>
         <v-container>
@@ -35,6 +35,8 @@
 </template>
 
 <script>
+import {eventBus} from "@/main.js";
+
   export default {
     name: 'Today',
     data: () => ({
@@ -82,6 +84,9 @@
       }
     },
     methods: {
+      openSidebar: function() {
+        eventBus.$emit('openSidebar', true);
+      },
       signOut() {
         this.$store.dispatch('SIGNOUT');
       },

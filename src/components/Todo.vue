@@ -1,5 +1,5 @@
 <template>
-  <v-row class="fill-height">
+  <v-row class="fill-height" v-touch:swipe.right="openSidebar">
     <v-col>
       <template>
         <v-container style="max-width: 768px">
@@ -73,6 +73,7 @@
 
 <script>
 import { db } from "@/main";
+import {eventBus} from "@/main.js";
 
 export default {
   name: 'Todo',
@@ -119,6 +120,9 @@ export default {
     }
   },
   methods: {
+    openSidebar: function() {
+      eventBus.$emit('openSidebar', true);
+    },
     async getTasks(uid) {
       this.$store.dispatch('setTodos', this.authUser.uid);
     },

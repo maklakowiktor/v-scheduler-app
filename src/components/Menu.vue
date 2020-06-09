@@ -202,6 +202,11 @@ export default {
             this.snackerNotifications('Уведомления включены');
         }
     },
+    mounted() {
+        eventBus.$on('openSidebar', (v) => {
+            this.drawer = v;
+        })
+    },
     computed: {
         categories() {
             let filterCats = [];

@@ -313,8 +313,11 @@ export default {
     filters: {
       showFilteredTime: (val) => {
         if (!val) return '';
-        let res = val.replace(/\T.*/, '');
-        return res.replace(/-/g, '.');
+        const res = val.replace(/\T.*/, '');
+        const nums = res.replace(/-/g, '.').split('.');
+        const newDateString = `${nums[2]}.${nums[1]}.${nums[0]}`;
+
+        return newDateString;
       }
     },
     methods: {
@@ -383,23 +386,25 @@ export default {
           this.alertErr();
         }
       },
+      validCategory(cat) {
+        if (typeof cat === 'string') {
+          return cat;
+        } else if(cat.category === 'Общие') {
+          return cat.category
+        }
+      },
       async query(param) {
         let privateEvent = null;
 
-        // if (param === 'publicEvents') {
-        //   privateEvent = false;
-        // } else {
-        //   privateEvent = true;
-        // }
         param === 'publicEvents' ? privateEvent = false : privateEvent = true
-        console.log(privateEvent, this.category);
+
         await db.collection(param).add({
           name: this.name,
           details: this.details,
-          start: new Date(this.start).toISOString().substring(0, 16),
-          end: new Date(this.end).toISOString().substring(0, 16),
+          start: new Date(this.start).addHours(3).toISOString().substring(0, 16),
+          end: new Date(this.end).addHours(3).toISOString().substring(0, 16),
           color: this.color,
-          category: this.category,
+          category: this.validCategory(this.category),
           geo: this.geo,
           duration: parseInt(this.duration),
           ownerUid: this.authUser.uid,
