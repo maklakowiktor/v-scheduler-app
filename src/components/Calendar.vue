@@ -20,12 +20,13 @@
                 dateFormat="dd.MM.yyyy" 
                 format="24hr" 
                 timeFormat="HH:mm" 
-                okText="Сохранить" 
+                okText="Сохранить"
                 clearText="" 
                 label="Начало *" 
                 v-model="start" 
                 :datePickerProps="{ scrollable: true }" 
                 :timePickerProps="{ format: '24hr', scrollable: true }" 
+                @input="showData"
                 required>
               </v-datetime-picker>
 
@@ -34,7 +35,7 @@
                 format="24hr" 
                 timeFormat="HH:mm" 
                 okText="Сохранить" 
-                clearText="" 
+                clearText=""
                 label="Окончание *" 
                 v-model="end" 
                 :datePickerProps="{ scrollable: true }" 
@@ -46,8 +47,9 @@
                 item-text="category"
                 item-value="category"
                 :items="categories"
-                v-model="category.category"
+                v-model="category"
                 label="Категория *"
+                @input="takeColor"
                 required
               ></v-select>
               
@@ -59,21 +61,8 @@
                 :items="periods"
                 v-model="duration"
                 label="Надпомнить через"
-                @input="onput"
                 required
               ></v-select>
-              
-              <v-text-field
-                v-model="color" 
-                type="color" 
-                label="Цвет (Нажмите, чтобы открыть меню выбора цвета)"
-                :outlined="true"
-                :background-color="color"
-                height="5"
-                :dense="true"
-                full-width
-                size="5"
-              >Выбрать цвет</v-text-field>
               
               <v-btn 
                 type="submit" 
@@ -158,7 +147,6 @@
 <script>
 import { db } from '@/main';
 import {eventBus} from "@/main.js";
-import moment from 'moment';
 
 export default {
     name: 'Calendar',
@@ -173,7 +161,7 @@ export default {
           "4day": '4 дня'
         },
         name: null,
-        details: null,
+        details: '',
         start: null,
         end:  null,
         color: '#1976D2',
@@ -259,7 +247,10 @@ export default {
       categories() {
         let filterCats = []
         this.$store.getters.getCategories.map( cat => {
-          filterCats.push(cat.category);
+          filterCats.push({
+            category: cat.category,
+            color: cat.color
+          });
         });
         filterCats.unshift({
           category: 'Общие',
@@ -316,7 +307,7 @@ export default {
           this.$router.push("/auth");
       },
       title (val) {
-        eventBus.$emit('eTitle', val)
+        eventBus.$emit('eTitle', val);
       }
     },
     filters: {
@@ -327,8 +318,15 @@ export default {
       }
     },
     methods: {
-      onput() {
-        console.log(this.duration);
+      takeColor() {
+        let getColors = this.categories;
+        let obj = getColors.filter( item => item.category === this.category);
+        this.color = obj[0].color;
+      },
+      showData() {
+        console.log(this.start);
+        let an = new Date(this.start).getHours() + 3;
+        console.log(an);
       },
       swipeRightHandler() {
         this.next();
@@ -388,19 +386,20 @@ export default {
       async query(param) {
         let privateEvent = null;
 
-        if (param === 'publicEvents') {
-          privateEvent = false;
-        } else {
-          privateEvent = true;
-        }
-        
+        // if (param === 'publicEvents') {
+        //   privateEvent = false;
+        // } else {
+        //   privateEvent = true;
+        // }
+        param === 'publicEvents' ? privateEvent = false : privateEvent = true
+        console.log(privateEvent, this.category);
         await db.collection(param).add({
           name: this.name,
           details: this.details,
           start: new Date(this.start).toISOString().substring(0, 16),
           end: new Date(this.end).toISOString().substring(0, 16),
           color: this.color,
-          category: this.category.category,
+          category: this.category,
           geo: this.geo,
           duration: parseInt(this.duration),
           ownerUid: this.authUser.uid,

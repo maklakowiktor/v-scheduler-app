@@ -39,11 +39,9 @@ export default {
             if (state.planning.length === 0) return;
             
             state.planning.forEach(event => {
-                console.log(event.end);
                 const end = new Date(event.end).addHours(3);
                 const now = new Date();
                 const diff = (end - now);
-                console.log(end.toISOString(), now.toISOString(), diff);
                 if ( diff >= 0 ) {
                     dispatch('createEvent', [event, diff]);
                 } else {
@@ -54,7 +52,6 @@ export default {
         createEvent: ({}, arr) => {
             let ev = arr[0];
             let ms = arr[1];
-            console.log(ev, ms);
             
             setTimeout((ev) => {
                 Push.create(ev.name, {

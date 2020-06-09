@@ -5,7 +5,7 @@
         <v-container style="max-width: 768px">
           <v-text-field
             v-model="task"
-            label="Над чем работаете?"
+            label="Введите задачу"
             solo
             @keydown.enter="create"
           >
@@ -85,7 +85,7 @@ export default {
       { text: "Календарь", icon: "mdi-calendar", link: "/calendar" },
       { text: "Дела", icon: "mdi-check-circle-outline", link: "/todo" }
     ],
-    task: null,
+    task: '',
     elevation: 1,
     time: null
   }),
@@ -126,11 +126,6 @@ export default {
       if (this.task === '') return;
       let task = this.task;
 
-      this.tasks.push({
-        done: false,
-        text: task
-      })
-
       this.task = null;
 
       await db.collection('todos').add({
@@ -138,6 +133,7 @@ export default {
         text: task,
         ownerUid: this.authUser.uid
       })
+      this.getTasks(this.authUser.uid);
     },
     async completeTask(id, done) {
       await db.collection('todos').doc(id).update({

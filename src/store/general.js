@@ -110,9 +110,14 @@ export default {
         getEvents: state => state.events,
         getCategories: state => state.categories,
         getFormatedEvents: (state) => {
+            let events = [];
             const regExp = /(\d{4}-\d{2}-\d{2})/g;
             const currentDate = new Date().toJSON().slice(0,10).toString();
-            let events = state.events;
+            events = state.events;
+
+            if ( events.length === 0 ) {
+                return [];
+            };
 
             events.map((event) => {
                 for ( let key in event ) {
@@ -126,7 +131,7 @@ export default {
             })
 
             events = events.filter( item => item.start === currentDate );
-
+            console.log('Formatted events - ', events);
             return events
         },
         getTodos: state => state.todos,

@@ -70,7 +70,6 @@
                             </template>
 
                             <v-card max-height="70vh" max-width="30vw">
-                                <!-- <v-col > -->
                                     <v-sheet elevation="0" class="pa-4" justify="end">
                                         <h3 class="mb-1">Фильтрация по категории:</h3>
                                         <v-chip-group
@@ -86,7 +85,6 @@
                                             <v-icon>mdi-undo</v-icon>
                                         </v-btn>
                                     </v-sheet>
-                                <!-- </v-col> -->
                             </v-card>
 
                         </v-menu>

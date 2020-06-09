@@ -87,15 +87,25 @@
       },
       getEvents() {
         this.$store.dispatch('setEvents', this.authUser.uid);
+      },
+      getTime(str) {
+        return str.substring(0, str.indexOf(":")); 
       }
     },
     filters: {
       filterTime: v => {
         if (!v) return '';
+        
         let pos = v.indexOf('T');
         v = v.split('').splice(pos + 1, pos).join().replace(/,/g, '');
+        
+        let plusThree = (parseInt(getTime(v)) + 3) + v.substring(v.length, v.indexOf(":"));
+        
+        function getTime(str) {
+          return str.substring(0, str.indexOf(":")); 
+        }
 
-        return v;
+        return plusThree;
       }
     }
   };
