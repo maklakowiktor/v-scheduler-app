@@ -39,9 +39,10 @@
                     <v-text-field id="repeatpassword" label="Повторите пароль" name="repeat-password"
                       prepend-icon="repeat" v-model="repeatPassword" :rules="repeatPasswordRules"
                       :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'" :type="show2 ? 'text' : 'password'"
-                      @click:append="show2 = !show2" required></v-text-field>
+                      @click:append="show2 = !show2" ref="repeatRef" required></v-text-field>
                   </v-col>
                   <span>* Все поля обязательны для заполнения</span>
+                  <span>* Получить секретный ключ можно у сист. администратора</span>
                 </v-row>
               </v-container>
             </v-form>
@@ -86,7 +87,7 @@
         ],
         passwordRules: [
           v => !!v || 'Введите пароль',
-          v => (v && v.length >= 6) || 'Пароль слишком короткий - минимум 6 символов'
+          v => (v && v.length >= 6) || 'Пароль слишком короткий - минимум 6 символов',
         ],
         repeatPasswordRules: [
           v => !!v || 'Повторите пароль',
@@ -125,6 +126,15 @@
     },
     methods: {
       signUp() {
+        if (this.password !== this.repeatPassword) { 
+          const vm = this;
+          
+          this.$store.commit('SET_ERROR', 'Введенные пароли не совпадают!');
+          setTimeout((vm) => { vm.$store.commit('CLEAR_ERROR') }, 4000, vm);
+          
+          return;
+        };
+        
         this.$store.dispatch('SIGNUP', {
           email: this.email,
           password: this.password,

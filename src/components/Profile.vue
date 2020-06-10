@@ -268,6 +268,14 @@
         },
         methods: {
             changePassword() {
+                if (this.newpassword !== this.repeatPassword) { 
+                    const vm = this;
+                    
+                    this.$store.commit('SET_ERROR', 'Введенные пароли не совпадают!');
+                    setTimeout((vm) => { vm.$store.commit('CLEAR_ERROR') }, 4000, vm);
+                    
+                    return;
+                };
                 this.$store.dispatch('CHANGE_USER_PASSWORD', {
                     password: this.password,
                     newPassword: this.newpassword
