@@ -96,10 +96,10 @@ export default {
                 if (doc.exists) {
                     commit('SET_SECRET_KEY', doc.data().key);
                 } else {
-                    console.log("Ошибка БД. Отсутствует секретный ключ!");
+                    alert("Ошибка БД. Отсутствует секретный ключ!");
                 }
             }).catch(function(error) {
-                console.log("Ошибка при получении ключа: ", error);
+                alert("Ошибка получения ключа. Перезагрузите страницу или обратитесь к сист. администратору", error);
             });
         }
     },
@@ -129,9 +129,8 @@ export default {
                     }
                 }
             })
-
             events = events.filter( item => item.start === currentDate );
-            console.log('Formatted events - ', events);
+
             return events
         },
         getTodos: state => state.todos,

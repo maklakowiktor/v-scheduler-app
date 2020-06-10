@@ -26,7 +26,6 @@
                 v-model="start" 
                 :datePickerProps="{ scrollable: true }" 
                 :timePickerProps="{ format: '24hr', scrollable: true }" 
-                @input="showData"
                 required>
               </v-datetime-picker>
 
@@ -325,11 +324,6 @@ export default {
         let getColors = this.categories;
         let obj = getColors.filter( item => item.category === this.category);
         this.color = obj[0].color;
-      },
-      showData() {
-        console.log(this.start);
-        let an = new Date(this.start).getHours() + 3;
-        console.log(an);
       },
       swipeRightHandler() {
         this.next();

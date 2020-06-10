@@ -302,9 +302,6 @@
             selectAvatar(avatar) {
                 this.form.avatar = '';
             },
-            async update() {
-                console.log(this.form);
-            },
             async addCategory() {
                 await db.collection('categories').add({
                     category: this.category,

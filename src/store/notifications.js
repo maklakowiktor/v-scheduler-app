@@ -69,7 +69,6 @@ export default {
                 const now = new Date();
                 const diff = (end - now);
                 
-                console.log("Event iterator: ", end, now, diff);
                 if ( diff >= 0 ) {
                     dispatch('createEvent', [event, diff]);
                 } else {
@@ -90,7 +89,7 @@ export default {
                         this.close();
                     }
                 });
-            }, ms, ev ); // ev.duration * 1000 * 60
+            }, ms, ev );
         },
         remindIterator: ({state, dispatch}) => {
             if (state.reminds.length === 0) return;
@@ -99,8 +98,6 @@ export default {
                 const end = new Date(event.end);
                 const now = new Date();
                 const diff = (end - now);
-
-                console.log(end, now, diff);
                 
                 if ( diff >= 0 ) {
                     dispatch('createRemind', event);
@@ -110,7 +107,6 @@ export default {
             });
         },
         createRemind: ({}, ev) => {
-            
             setTimeout((ev) => {
                 Push.create(ev.name, {
                     body: "Напоминание: " + ev.details,
@@ -120,7 +116,7 @@ export default {
                         this.close();
                     }
                 });
-            }, ev.duration * 1000 * 60, ev ); // ev.duration * 1000 * 60
+            }, ev.duration * 1000 * 60, ev );
         },
     }
 }
