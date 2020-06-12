@@ -1,8 +1,7 @@
 <template>
-  <v-row class="fill-height" v-touch:swipe.right="openSidebar">
     <v-col>
       <template>
-        <v-container style="max-width: 768px">
+        <v-container style="max-width: 768px" v-touch:swipe.right="openSidebar">
           <v-text-field
             v-model="task"
             label="Введите задачу"
@@ -68,7 +67,6 @@
         </v-container>
       </template>
     </v-col>
-  </v-row>
 </template>
 
 <script>

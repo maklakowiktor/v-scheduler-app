@@ -41,8 +41,12 @@
                       :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'" :type="show2 ? 'text' : 'password'"
                       @click:append="show2 = !show2" ref="repeatRef" required></v-text-field>
                   </v-col>
-                  <span>* Все поля обязательны для заполнения</span>
-                  <span>* Получить секретный ключ можно у сист. администратора</span>
+                  <div style="width: 100%;">
+                    <span>* Все поля обязательны для заполнения</span>
+                  </div>
+                  <div>
+                    <span>* Получить секретный ключ можно у сист. администратора</span>
+                  </div>
                 </v-row>
               </v-container>
             </v-form>

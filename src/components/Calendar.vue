@@ -1,6 +1,7 @@
 <template>
-  <v-row class="fill-height">
-    <v-col class="pt-0 pb-0">
+<div>
+  <!-- <v-row class="fill-height"> -->
+    <v-col class="pa-0">
       <!-- Предупреждение -->
       <v-slide-y-transition class="py-0">
         <v-alert type="error" v-show="errShow">
@@ -90,9 +91,10 @@
           @change="updateRange"
           v-touch:swipe.left="swipeRightHandler"
           v-touch:swipe.right="swipeLeftHandler"
+          v-touch:longtap="longtapHandler"
         ></v-calendar>
         <v-menu v-model="selectedOpen" :close-on-content-click="false" :activator="selectedElement" offset-x>
-          <v-card color="grey lighten-4" min-width="350px" flat>
+          <v-card color="grey lighten-4" flat>
             <v-toolbar :color="selectedEvent.color" dark>
               <v-btn v-if="selectedEvent.ownerUid === authUser.uid" @click="deleteEvent(selectedEvent.id, selectedEvent.private)" icon>
                 <v-icon>mdi-delete</v-icon>
@@ -140,7 +142,59 @@
     <v-snackbar v-model="snackbar" :timeout="4000">{{ snacktext }}
           <v-btn color="blue" text @click="snackbar = false">Закрыть</v-btn>
     </v-snackbar>
-  </v-row>
+  <!-- </v-row> -->
+    <v-dialog v-model="dialogSelect" fullscreen hide-overlay transition="dialog-bottom-transition">
+        <v-card>
+          <v-toolbar dark color="primary">
+            <v-btn icon dark @click="dialogSelect = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+            <v-toolbar-title>Инструменты</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-toolbar-items>
+              <v-btn dark text @click="dialogSelect = false"><v-icon>mdi-content-save</v-icon></v-btn>
+            </v-toolbar-items>
+          </v-toolbar>
+            <v-list three-line subheader>
+              <v-subheader>Фильтр: {{ selectedFilter }}</v-subheader>
+              <v-sheet elevation="0" class="pa-4" justify="center">
+                    <v-chip-group column active-class="white--text">
+                        <v-chip v-for="(tag, idx) in categories" :key="idx" :color="tag.color" @click="filterEvents(tag.category)">
+                            {{ tag.category }}
+                        </v-chip>
+                    </v-chip-group>
+                    <v-btn color="primary" dark height="30" outlined rounded @click="resetFilters" :disabled="filtered">
+                        <v-icon>mdi-undo</v-icon>
+                    </v-btn>
+              </v-sheet>
+            </v-list>
+          <v-divider></v-divider>
+            <v-subheader>Тип календаря: {{ typeToLabel[this.type] }}</v-subheader>
+            <v-list>
+              <v-list-item @click="type = 'day'">
+                  <v-list-item-title>День
+                  </v-list-item-title>
+                  <v-icon v-if="type == 'day'" color="green">mdi-checkbox-marked-circle</v-icon>
+              </v-list-item>
+              <v-list-item @click="type = 'week'">
+                  <v-list-item-title>Неделя
+                  </v-list-item-title>
+                  <v-icon v-if="type == 'week'" color="green">mdi-checkbox-marked-circle</v-icon>
+              </v-list-item>
+              <v-list-item @click="type = 'month'">
+                  <v-list-item-title>Месяц
+                  </v-list-item-title>
+                  <v-icon v-if="type =='month'" color="green">mdi-checkbox-marked-circle</v-icon>
+              </v-list-item>
+              <v-list-item @click="type = '4day'">
+                  <v-list-item-title>4 дня
+                  </v-list-item-title>
+                  <v-icon v-if="type =='4day'" color="green">mdi-checkbox-marked-circle</v-icon>
+              </v-list-item>
+            </v-list>
+        </v-card>
+      </v-dialog>
+</div>
 </template>
 
 <script>
@@ -207,6 +261,9 @@ export default {
         swipeDirection: 'None',
         snackbar: false,
         snacktext: '',
+        dialogSelect: false,
+        selectedFilter: null,
+        filtered: true
     }),
     beforeDestroy() {
       eventBus.$off('eSetToday');
@@ -235,6 +292,9 @@ export default {
       }),
       eventBus.$on('eType', (type) => {
         this.type = type;
+      })
+      eventBus.$on('setFilter', (v) => {
+        this.selectedFilter = v;
       })
       
       this.getEvents();
@@ -331,6 +391,9 @@ export default {
       swipeLeftHandler() {
         this.prev();
       },
+      longtapHandler() {
+        this.dialogSelect = true;
+      },
       swipe (direction) {
         this.snacktext = status;
         this.snackbar = true;
@@ -349,7 +412,19 @@ export default {
         this.end = this.start = new Date();
       },
       closeDialog() {
-        this.dialog = false; 
+        this.dialog = false;
+      },
+      filterEvents(category) {
+        this.$store.dispatch('SORT_EVENTS', category);
+        this.filtered = false;
+        this.selectedFilter = category;
+        eventBus.$emit('setFilter', category);
+      },
+      resetFilters() {
+          this.$store.commit('RESET_EVENTS');
+          this.filtered = true;
+          this.selectedFilter = null;
+          eventBus.$emit('setFilter', null);
       },
       resetForm() {
         this.name = '';

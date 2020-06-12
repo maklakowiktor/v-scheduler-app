@@ -1,4 +1,5 @@
 import { db } from '@/main';
+import { eventBus } from '@/main';
 
 export default {
     state: {
@@ -15,7 +16,15 @@ export default {
             state.processing = payload;
         },
         SET_ERROR(state, payload) {
-            state.error = payload;
+            if (payload === 'The password is invalid or the user does not have a password.') {
+                return state.error = 'Пароль неверен';
+            } else if(payload === 'There is no user record corresponding to this identifier. The user may have been deleted.') {
+                return state.error = 'Нет записи пользователя, соответствующей этому E-mail идентификатору';
+            } else if(payload === 'The email address is already in use by another account.') {
+                return state.error = 'Адрес электронной почты уже используется другой учетной записью.';
+            } else {
+                state.error = payload;
+            }
         },
         CLEAR_ERROR(state) {
             state.error = null;
@@ -23,6 +32,7 @@ export default {
         SET_EVENTS: (state, events) => {
             state.events = events;
             state.initEvents = events;
+            eventBus.$emit('loading');
         },
         SET_TODOS: (state, todos) => {
             state.todos = todos;

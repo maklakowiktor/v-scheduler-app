@@ -1,12 +1,34 @@
 <template>
-  <v-row class="fill-height" v-touch:swipe.right="openSidebar">
     <v-col>
       <template>
-        <v-container>
-          <v-row class="pr-2  " dense>
+        <v-container v-touch:swipe.right="openSidebar">
+          <v-row class="pr-2" dense>
             <v-card min-width="100%">
-              <v-col v-if="!events.length">
-                <p>Нет запланированных встреч на сегодня</p>
+              <v-dialog
+                v-if="loading"
+                v-model="loading"
+                hide-overlay
+                persistent
+                width="300"
+              >
+                <v-card
+                  color="primary"
+                  dark
+                >
+                  <v-card-text>
+                    Пожалуйста подождите...
+                    <v-progress-linear
+                      indeterminate
+                      color="white"
+                      class="mb-0"
+                    ></v-progress-linear>
+                  </v-card-text>
+                </v-card>
+              </v-dialog>
+              <v-col v-else-if="!events.length">
+                <div class="d-flex justify-center">
+                  Нет запланированных встреч или событий на сегодня
+                </div>
               </v-col>
               <v-col v-else>
                 <v-card-text v-for="(event, i) in events" :key="i" class="py-0">
@@ -31,7 +53,6 @@
         </v-container>
       </template>
     </v-col>
-  </v-row>
 </template>
 
 <script>
@@ -65,6 +86,10 @@ import {eventBus} from "@/main.js";
       this.getEvents();
 
       this.$store.dispatch('setCategories', this.authUser.uid);
+
+      eventBus.$on('loading', () => {
+        this.loading = false;
+      })
     },
     computed: {
       events() {

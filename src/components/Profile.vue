@@ -1,8 +1,8 @@
 <template>
     <v-container fluid>
-        <v-layout row wrap align-center>
-            <v-row justify="center">
-                <v-card class="ma-5" min-width="45%">
+        <v-layout row wrap justify-space-around> <!-- align-center -->
+            <v-flex xs11 md5 class="mb-5">
+                <v-card>
                     <v-col class="shrink">
                         <v-card-text>
                             <v-row justify="center" align="center">
@@ -19,7 +19,6 @@
                         </v-card-text>
                         <v-card-actions>
                             <v-btn color="primary" :loading="loading" @click="dialog = true" outlined>
-                                <v-icon left dark>check</v-icon>
                                 Изменить пароль
                             </v-btn>
 
@@ -66,7 +65,9 @@
                         </v-card-actions>
                     </v-col>
                 </v-card>
-                <v-card class="ma-5 scroll" min-width="45%" max-height="500px">
+            </v-flex>
+            <v-flex xs11 md5>
+                <v-card class="scroll" max-height="500px">
                     <v-card-text>
                         <v-card-title class="headline">
                             Категории
@@ -75,8 +76,7 @@
                                 <v-icon>mdi-plus</v-icon>
                             </v-btn>
                         </v-card-title>
-
-
+                        <v-divider></v-divider>
                         <v-dialog v-model="dialog2" max-width="290">
                             <v-card>
                                 <v-card-title class="headline">Добавить категорию</v-card-title>
@@ -120,7 +120,10 @@
                             </v-card>
                         </v-dialog>
                     </v-card-text>
-                    <v-list-item v-for="item in categories" :key="item.id" color="#FFEBEE">
+                    <v-row v-if="categories.length == 0" justify="center" align="center" max-width="100%">
+                        Пусто
+                    </v-row>
+                    <v-list-item v-else v-for="item in categories" :key="item.id" color="#FFEBEE">
                         <v-list-item-content>
                             <v-list-item-title v-text="item.category"></v-list-item-title>
                         </v-list-item-content>
@@ -141,7 +144,7 @@
                         </v-list-item-action>
                     </v-list-item>
                 </v-card>
-            </v-row>
+            </v-flex>
         </v-layout>
     </v-container>
 </template>

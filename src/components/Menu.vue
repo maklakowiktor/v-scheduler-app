@@ -1,37 +1,38 @@
 <template>
-    <v-row fixed>
+    <div>
+    <!-- <v-row> -->
     <!-- Сайдбар -->
         <v-navigation-drawer v-model="drawer" app class="white pt-0" v-if="isUserAuthenticated">
-        <v-list class="mt-0 pt-0">
-            <v-list-item class="mb-0 pt-2" link to="/profile">
-                <v-list-item-avatar class="mb-4">
-                    <v-img :src="require('../assets/logo.png')"></v-img>
-                </v-list-item-avatar>
-                <v-list-item-content class="mb-2">
-                    <v-list-item-title>{{ authUser.initials | filterInitials }}</v-list-item-title>
-                </v-list-item-content>
-            </v-list-item >
-            <v-divider></v-divider>
-            <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link" @click="selectedFilter = null; filtered = true; menu = false;">
-                <v-list-item-icon>
-                    <v-icon v-text="item.icon"></v-icon>
-                </v-list-item-icon>
-                <v-list-item-content>
-                    <v-list-item-title v-text="item.text"></v-list-item-title>
-                </v-list-item-content>
-            </v-list-item>
-        </v-list>
-        <template v-slot:append>
-            <div class="pa-2 border" justify="center" align="center">
-                <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated" outlined>
-                    <v-icon>exit_to_app</v-icon>
-                    Выйти
-                </v-btn>
-            </div>
-        </template>
+            <v-list class="mt-0 pt-0">
+                <v-list-item class="mb-0 pt-2" link to="/profile">
+                    <v-list-item-avatar class="mb-4">
+                        <v-img :src="require('../assets/logo.png')"></v-img>
+                    </v-list-item-avatar>
+                    <v-list-item-content class="mb-2">
+                        <v-list-item-title>{{ authUser.initials | filterInitials }}</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item >
+                <v-divider></v-divider>
+                <v-list-item v-for="(item, i) in items" :key="i" link :to="item.link" @click="selectedFilter = null; filtered = true; menu = false;">
+                    <v-list-item-icon>
+                        <v-icon v-text="item.icon"></v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-content>
+                        <v-list-item-title v-text="item.text"></v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+            </v-list>
+            <template v-slot:append>
+                <div class="pa-2 border" justify="center" align="center">
+                    <v-btn text @click.prevent="signOut" v-if="isUserAuthenticated" outlined>
+                        <v-icon>exit_to_app</v-icon>
+                        Выйти
+                    </v-btn>
+                </div>
+            </template>
         </v-navigation-drawer>
         <!-- Top menu -->
-        <v-col class="mb-0 pt-0 pb-0">
+        <v-col class="mb-0 pa-0">
             <v-sheet :elevation="elevation" height="72" v-if="isUserAuthenticated" tile>
                 <!-- Today component menu -->
                 <v-toolbar flat color="white" class="today-component pt-1" v-if="currentRoute == 'Today'">
@@ -43,16 +44,31 @@
                 <v-toolbar class="pt-1" flat color="white" v-else-if="currentRoute == 'Calendar'">
                     <!-- Sidebar btn -->
                     <v-app-bar-nav-icon class="grey--text mr-1" @click="drawer = !drawer"></v-app-bar-nav-icon>                    
-                    <v-btn outlined class="mr-4" @click="setToday">Сегодня</v-btn>
-                    <v-btn fab text small color="grey darken-2" @click="prev">
+                    <v-btn outlined class="mr-4 hidden-sm-and-down" @click="setToday">Сегодня</v-btn>
+                    <v-btn class="hidden-sm-and-down" fab text small color="grey darken-2" @click="prev">
                         <v-icon small>mdi-chevron-left</v-icon>
                     </v-btn>
-                    <v-btn fab text small color="grey darken-2" class="mr-4" @click="next">
+                    <v-btn fab text small color="grey darken-2" class="mr-4 hidden-sm-and-down" @click="next">
                         <v-icon small>mdi-chevron-right</v-icon>
                     </v-btn>
                     <v-toolbar-title>{{ title }}</v-toolbar-title>
                     <v-spacer></v-spacer>
-                    <div class="text-center mr-5">
+                    <v-btn icon  class="mr-3 hidden-md-and-up" @click="setToday">
+                        <v-icon dark color="black">mdi-calendar-today</v-icon>
+                    </v-btn>
+                    <v-tooltip bottom>
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-icon
+                                class="hidden-md-and-up"
+                                color="black"
+                                dark
+                                v-bind="attrs"
+                                v-on="on"
+                            >mdi-calendar-question</v-icon>
+                        </template>
+                        <span>Чтобы получить доступ к инструментам, коснитесь календаря и удерживайте</span>
+                    </v-tooltip>
+                    <div class="text-center mr-5 hidden-sm-and-down">
                         <v-menu
                             v-model="menu"
                             :close-on-content-click="true"
@@ -86,12 +102,12 @@
                                         </v-btn>
                                     </v-sheet>
                             </v-card>
-
                         </v-menu>
                     </div>
                     <v-menu bottom right nudge-right>
                         <template v-slot:activator="{ on }">
                             <v-btn
+                                class="hidden-sm-and-down"
                                 outlined
                                 color="grey darken-2"
                                 v-on="on"
@@ -136,7 +152,8 @@
             {{ snacktext }}
             <v-btn color="blue" text @click="snackbar = false">Закрыть</v-btn>
         </v-snackbar>
-    </v-row>
+    <!-- </v-row> -->
+    </div>
 </template>
 
 <script>
@@ -205,6 +222,9 @@ export default {
     mounted() {
         eventBus.$on('openSidebar', (v) => {
             this.drawer = v;
+        }),
+        eventBus.$on('setFilter', (v) => {
+            this.selectedFilter = v;
         })
     },
     computed: {
@@ -259,11 +279,13 @@ export default {
             this.$store.dispatch('SORT_EVENTS', category);
             this.filtered = false;
             this.selectedFilter = category;
+            eventBus.$emit('setFilter', category);
         },
         resetFilters() {
             this.$store.commit('RESET_EVENTS');
             this.filtered = true;
             this.selectedFilter = null;
+            eventBus.$emit('setFilter', null);
         },
     },
     filters: {

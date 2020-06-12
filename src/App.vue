@@ -1,7 +1,7 @@
 <template>
-  <v-app>
+  <v-app id="inspire">
       <v-content class="v-con-bg">
-        <Menu />
+      <Menu />
         <vue-page-transition name="fade-in-right">
           <router-view></router-view>
         </vue-page-transition>
@@ -11,6 +11,7 @@
 
 <script>
 import Menu from './components/Menu.vue';
+import { eventBus } from '@/main.js';
 
 export default {
   name: 'App',
@@ -19,6 +20,8 @@ export default {
   },
   data: () => ({
   }),
+  methods: {
+  },
 };
 </script>
 
