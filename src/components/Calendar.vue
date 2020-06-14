@@ -9,7 +9,7 @@
         </v-alert>
       </v-slide-y-transition>
       <!-- Диалоговое окно добавления события -->
-      <v-dialog v-model="dialog" max-width="500">
+      <v-dialog v-model="dialog" max-width="500" persistent>
         <v-card>
           <v-container>
             <v-form @submit.prevent="addEvent">
@@ -63,13 +63,20 @@
                 label="Надпомнить через"
                 required
               ></v-select>
-              
-              <v-btn 
-                type="submit" 
-                color="primary" 
-                class="mr-4" 
-                @click.stop="closeDialog"
-              >Создать событие</v-btn>
+              <v-flex class="d-flex justify-space-between">
+                <v-btn 
+                  type="cancel" 
+                  color="red" 
+                  class="mr-4"
+                  outlined
+                  @click.prevent="resetForm"
+                >Отмена</v-btn>
+                <v-btn 
+                  type="submit" 
+                  color="primary" 
+                  @click.stop="closeDialog"
+                >Создать</v-btn>
+              </v-flex>
             </v-form>
           </v-container>
         </v-card>
@@ -367,22 +374,6 @@ export default {
       title(val) {
         eventBus.$emit('eTitle', val);
       },
-      dialog(val) {
-        if (!val) {
-          this.name = '';
-          this.details = '';
-          this.end = '';
-          this.start = '';
-          this.category = {
-            category: 'Общие',
-          },
-          this.geo = '';
-          this.duration = {
-            value: 0,
-          },
-          this.color = '#1976D2';
-        }
-      }
     },
     filters: {
       showFilteredTime: (val) => {
@@ -454,8 +445,7 @@ export default {
           value: 0,
         },
         this.color = '#1976D2';
-        this.getEvents();
-
+        this.dialog = false;
       },
       addEvent() {
         if (this.name && this.start && this.end && this.category.category === 'Общие') {
@@ -494,6 +484,7 @@ export default {
           ownerUid: this.authUser.uid,
           private: privateEvent
         })
+        this.getEvents();
         this.resetForm();
         // this.$store.dispatch('uploadEvents');
       },
