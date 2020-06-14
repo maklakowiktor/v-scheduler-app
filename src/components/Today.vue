@@ -129,13 +129,13 @@ import {eventBus} from "@/main.js";
         let pos = v.indexOf('T');
         v = v.split('').splice(pos + 1, pos).join().replace(/,/g, '');
         
-        let plusThree = (parseInt(getTime(v)) + 3) + v.substring(v.length, v.indexOf(":"));
+        // let plusThree = (parseInt(getTime(v)) + 0) + v.substring(v.length, v.indexOf(":"));
         
-        function getTime(str) {
-          return str.substring(0, str.indexOf(":")); 
-        }
+        // function getTime(str) {
+        //   return str.substring(0, str.indexOf(":")); 
+        // }
 
-        return plusThree;
+        return v;
       }
     }
   };
