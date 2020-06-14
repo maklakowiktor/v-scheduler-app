@@ -364,8 +364,24 @@ export default {
         if (val !== true)
           this.$router.push("/auth");
       },
-      title (val) {
+      title(val) {
         eventBus.$emit('eTitle', val);
+      },
+      dialog(val) {
+        if (!val) {
+          this.name = '';
+          this.details = '';
+          this.end = '';
+          this.start = '';
+          this.category = {
+            category: 'Общие',
+          },
+          this.geo = '';
+          this.duration = {
+            value: 0,
+          },
+          this.color = '#1976D2';
+        }
       }
     },
     filters: {
