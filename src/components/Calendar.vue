@@ -142,7 +142,6 @@
     <v-snackbar v-model="snackbar" :timeout="4000">{{ snacktext }}
           <v-btn color="blue" text @click="snackbar = false">Закрыть</v-btn>
     </v-snackbar>
-  <!-- </v-row> -->
     <v-dialog v-model="dialogSelect" fullscreen hide-overlay transition="dialog-bottom-transition">
         <v-card>
           <v-toolbar dark color="primary">

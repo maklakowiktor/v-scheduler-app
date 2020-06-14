@@ -1,6 +1,6 @@
 <template>
-    <v-container fluid>
-        <v-layout row wrap justify-space-around> <!-- align-center -->
+    <v-container fluid v-touch:swipe.right="openSidebar">
+        <v-layout row wrap justify-space-around > <!-- align-center -->
             <v-flex xs11 md5 class="mb-5">
                 <v-card>
                     <v-col class="shrink">
@@ -120,9 +120,9 @@
                             </v-card>
                         </v-dialog>
                     </v-card-text>
-                    <v-row v-if="categories.length == 0" justify="center" align="center" max-width="100%">
+                    <div class="mb-4" v-if="categories.length == 0" justify="center" align="center" max-width="100%">
                         Пусто
-                    </v-row>
+                    </div>
                     <v-list-item v-else v-for="item in categories" :key="item.id" color="#FFEBEE">
                         <v-list-item-content>
                             <v-list-item-title v-text="item.category"></v-list-item-title>
@@ -270,6 +270,9 @@
             },
         },
         methods: {
+            openSidebar: function() {
+                eventBus.$emit('openSidebar', true);
+            },
             changePassword() {
                 if (this.newpassword !== this.repeatPassword) { 
                     const vm = this;
