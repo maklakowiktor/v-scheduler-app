@@ -458,6 +458,7 @@ export default {
 
         } else {
           this.alertErr();
+          this.resetForm();
         }
       },
       validCategory(cat) {

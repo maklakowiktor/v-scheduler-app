@@ -35,10 +35,11 @@
                   <v-timeline align-top dense>
                     <v-timeline-item :color="event.color" small align="center" justify="center">
                       <v-row class="pt-1">
-                        <v-col cols="3">
+                        <v-col >Время завершения: 
                           <strong>{{ event.end | filterTime }}</strong>
                         </v-col>
                         <v-col>
+                          Название:
                           <strong>{{ event.name }}</strong>
                           <div class="caption">{{ event.details }}</div>
                         </v-col>
