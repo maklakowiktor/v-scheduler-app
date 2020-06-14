@@ -21,7 +21,9 @@ export default {
             } else if(payload === 'There is no user record corresponding to this identifier. The user may have been deleted.') {
                 return state.error = 'Нет записи пользователя, соответствующей этому E-mail идентификатору';
             } else if(payload === 'The email address is already in use by another account.') {
-                return state.error = 'Адрес электронной почты уже используется другой учетной записью.';
+                return state.error = 'Адрес электронной почты уже используется другой учетной записью';
+            } else if(payload === 'Too many unsuccessful login attempts. Please try again later.') {
+                return state.error = 'Слишком много неудачных попыток входа в систему. Пожалуйста, попробуйте позже.';
             } else {
                 state.error = payload;
             }
