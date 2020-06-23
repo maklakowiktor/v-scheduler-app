@@ -87,7 +87,10 @@
           ref="calendar"
           v-model="focus"
           color="primary"
+          :weekdays="weekday"
           :events="events"
+          event-overlap-mode="column"
+          :event-overlap-threshold="60"
           :event-color="getEventColor"
           :event-margin-bottom="3"
           :now="today"
@@ -99,7 +102,8 @@
           v-touch:swipe.left="swipeRightHandler"
           v-touch:swipe.right="swipeLeftHandler"
           v-touch:longtap="longtapHandler"
-        ></v-calendar>
+        >
+        </v-calendar>
         <v-menu v-model="selectedOpen" :close-on-content-click="false" :activator="selectedElement" offset-x>
           <v-card color="grey lighten-4" flat>
             <v-toolbar :color="selectedEvent.color" dark>
@@ -225,6 +229,7 @@ export default {
         end:  null,
         color: '#1976D2',
         geo: null,
+        weekday: [0, 1, 2, 3, 4, 5, 6],
         dbs: ['calEvent', 'publicEvents'],
         category: {
           category: 'Общие',
