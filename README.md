@@ -23,6 +23,6 @@ npm run lint
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
-Live demo: [demo](https://vuescheduler.netlify.app/).
+Live demo: [demo](https://vuescheduler.netlify.app/). // Ключ: 082021
 
 Production deployment: [prod](https://план.котласское.рф/).
