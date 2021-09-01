@@ -23,5 +23,5 @@ npm run lint
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
-Live demo: https://vue-scheduler.herokuapp.com/
+Live demo: https://laughing-agnesi-7298e0.netlify.app/
 Production deployment: https://план.котласское.рф/
