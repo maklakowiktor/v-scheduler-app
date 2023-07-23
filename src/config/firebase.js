@@ -1,9 +1,9 @@
 export default {
-    apiKey: "AIzaSyCAMK9oY2brZznsgh0jjHp3UloNbE_oa0I",
-    authDomain: "plan-fbcd7.firebaseapp.com",
+    apiKey: "AIzaSyDeUzSZjJfYGLgMk-dxlCelUo7R8qef5xs",
+    authDomain: "vue-calendar-f18d0.firebaseapp.com",
+    projectId: "vue-calendar-f18d0",
+    storageBucket: "vue-calendar-f18d0.appspot.com",
+    messagingSenderId: "548450933290",
     databaseURL: "https://plan-fbcd7.firebaseio.com",
-    projectId: "plan-fbcd7",
-    storageBucket: "plan-fbcd7.appspot.com",
-    messagingSenderId: "549407569597",
-    appId: "1:549407569597:web:f0725a41c49579dfd469d4"
+    appId: "1:548450933290:web:b8ace3e688ad1595d28153"
 }
